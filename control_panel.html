@@ -3,238 +3,340 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smash Overlay Control Panel</title>
+    <title>Overlay Control Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Poppins', sans-serif; background-color: #1a202c; }
-        .controls { background-color: #2d3748; color: white; }
-        input, select { background-color: #4a5568; border: 1px solid #718096; color: white; }
-        .player-name-red { color: #FF7300; }
-        .player-name-blue { color: #FFFFFF; }
-        #status-indicator { transition: background-color 0.3s ease; }
+        body {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+        }
+        .card {
+            background-color: #2d3748;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .input-field {
+            background-color: #4a5568;
+            border: 1px solid #718096;
+            color: #e2e8f0;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            width: 100%;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.5);
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .btn-primary {
+            background-color: #4299e1;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #3182ce;
+        }
+        .btn-secondary {
+            background-color: #f6e05e;
+            color: #424242;
+        }
+        .btn-secondary:hover {
+            background-color: #f59e0b;
+        }
+        .score-btn {
+            background-color: #4a5568;
+            color: white;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            border-radius: 0.375rem;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div class="controls p-6 rounded-lg max-w-7xl mx-auto shadow-2xl">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-center">Overlay Control Panel</h2>
-            <div class="flex items-center gap-2">
-                <span id="status-text" class="text-sm font-semibold">Connecting...</span>
-                <div id="status-indicator" class="w-4 h-4 rounded-full bg-yellow-500"></div>
+    <header class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-white">Overlay Control Panel</h1>
+        <div id="status" class="flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-semibold">
+            <span id="status-indicator" class="w-3 h-3 rounded-full"></span>
+            <span id="status-text">Connecting...</span>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Player 1 Card -->
+        <div class="card space-y-4">
+            <h2 class="text-xl font-bold text-orange-400">Player 1</h2>
+            <div>
+                <label for="p1-sponsor" class="block text-sm font-medium mb-1">Sponsor</label>
+                <input type="text" id="p1-sponsor" class="input-field" placeholder="Sponsor Tag">
+            </div>
+            <div>
+                <label for="p1-tag" class="block text-sm font-medium mb-1">Tag</label>
+                <input type="text" id="p1-tag" class="input-field" placeholder="Pistol Pete">
+            </div>
+            <div>
+                <label for="p1-pronouns" class="block text-sm font-medium mb-1">Pronouns</label>
+                <input type="text" id="p1-pronouns" class="input-field" placeholder="he/him">
+            </div>
+            <div>
+                <label for="p1-status" class="block text-sm font-medium mb-1">Status (L/W)</label>
+                <input type="text" id="p1-status" class="input-field" placeholder="Winners">
+            </div>
+            <div>
+                <label for="p1-score" class="block text-sm font-medium mb-1">Score</label>
+                <div class="flex items-center space-x-2">
+                    <button id="p1-score-down" class="score-btn">-</button>
+                    <input type="number" id="p1-score" class="input-field text-center" value="0">
+                    <button id="p1-score-up" class="score-btn">+</button>
+                </div>
+            </div>
+            <div>
+                <label for="p1-character" class="block text-sm font-medium mb-1">Character</label>
+                <select id="p1-character" class="input-field"></select>
             </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="space-y-3 p-4 bg-gray-900/50 rounded-md">
-                <h3 class="text-xl font-semibold text-center player-name-red">Player 1</h3>
-                <div>
-                    <label for="p1-tag" class="block text-sm font-medium">Tag</label>
-                    <input type="text" id="p1-tag" value="Pistol Pete" class="mt-1 block w-full rounded-md p-2">
-                </div>
-                <div>
-                    <label for="p1-status" class="block text-sm font-medium">Status (L/W)</label>
-                    <input type="text" id="p1-status" value="Winners" class="mt-1 block w-full rounded-md p-2">
-                </div>
-                <div>
-                    <label for="p1-score" class="block text-sm font-medium">Score</label>
-                    <div class="flex items-center gap-2 mt-1">
-                        <button id="p1-score-minus" class="bg-red-500 hover:bg-red-600 font-bold p-2 rounded-md w-10">-</button>
-                        <input type="number" id="p1-score" value="0" class="block w-full rounded-md p-2 text-center">
-                        <button id="p1-score-plus" class="bg-green-500 hover:bg-green-600 font-bold p-2 rounded-md w-10">+</button>
-                    </div>
-                </div>
-                <div>
-                    <label for="p1-char" class="block text-sm font-medium">Character</label>
-                    <select id="p1-char" class="mt-1 block w-full rounded-md p-2"></select>
+
+        <!-- Match Info Card -->
+        <div class="card space-y-4">
+            <h2 class="text-xl font-bold text-white">Match Info</h2>
+            <div>
+                <label for="round" class="block text-sm font-medium mb-1">Round</label>
+                <input type="text" id="round" class="input-field" placeholder="Grand Finals">
+            </div>
+            <div>
+                <label for="format-type" class="block text-sm font-medium mb-1">Format</label>
+                <div class="flex space-x-2">
+                    <select id="format-type" class="input-field w-2/3">
+                        <option>Best of</option>
+                        <option>First to</option>
+                    </select>
+                    <input type="number" id="format-number" class="input-field w-1/3" placeholder="5">
                 </div>
             </div>
-            <div class="space-y-3 p-4 bg-gray-900/50 rounded-md">
-                <h3 class="text-xl font-semibold text-center">Match Info</h3>
-                <div>
-                    <label for="round" class="block text-sm font-medium">Round</label>
-                    <input type="text" id="round" value="Grand Finals" class="mt-1 block w-full rounded-md p-2">
-                </div>
-                <div>
-                    <label for="bestof" class="block text-sm font-medium">Format / Best of</label>
-                    <input type="text" id="bestof" value="Best of 5" class="mt-1 block w-full rounded-md p-2">
-                </div>
-                <div class="pt-4 space-y-2">
-                    <button id="swap-players" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded-md transition-colors">
-                        Swap Players
-                    </button>
-                    <button id="update-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md text-lg transition-colors">
-                        Force Update
-                    </button>
+            <button id="swap-players" class="btn btn-secondary w-full">Swap Players</button>
+            <button id="force-update" class="btn btn-primary w-full">Force Update</button>
+        </div>
+
+        <!-- Player 2 Card -->
+        <div class="card space-y-4">
+            <h2 class="text-xl font-bold text-blue-400">Player 2</h2>
+            <div>
+                <label for="p2-sponsor" class="block text-sm font-medium mb-1">Sponsor</label>
+                <input type="text" id="p2-sponsor" class="input-field" placeholder="Sponsor Tag">
+            </div>
+            <div>
+                <label for="p2-tag" class="block text-sm font-medium mb-1">Tag</label>
+                <input type="text" id="p2-tag" class="input-field" placeholder="The Cowboy">
+            </div>
+            <div>
+                <label for="p2-pronouns" class="block text-sm font-medium mb-1">Pronouns</label>
+                <input type="text" id="p2-pronouns" class="input-field" placeholder="he/him">
+            </div>
+            <div>
+                <label for="p2-status" class="block text-sm font-medium mb-1">Status (L/W)</label>
+                <input type="text" id="p2-status" class="input-field" placeholder="Losers">
+            </div>
+            <div>
+                <label for="p2-score" class="block text-sm font-medium mb-1">Score</label>
+                <div class="flex items-center space-x-2">
+                    <button id="p2-score-down" class="score-btn">-</button>
+                    <input type="number" id="p2-score" class="input-field text-center" value="0">
+                    <button id="p2-score-up" class="score-btn">+</button>
                 </div>
             </div>
-            <div class="space-y-3 p-4 bg-gray-900/50 rounded-md">
-                <h3 class="text-xl font-semibold text-center player-name-blue">Player 2</h3>
-                <div>
-                    <label for="p2-tag" class="block text-sm font-medium">Tag</label>
-                    <input type="text" id="p2-tag" value="The Cowboy" class="mt-1 block w-full rounded-md p-2">
-                </div>
-                <div>
-                    <label for="p2-pronouns" class="block text-sm font-medium">Pronouns</label>
-                    <input type="text" id="p2-pronouns" value="" class="mt-1 block w-full rounded-md p-2">
-                </div>
-                <div>
-                    <label for="p2-status" class="block text-sm font-medium">Status (L/W)</label>
-                    <input type="text" id="p2-status" value="Losers" class="mt-1 block w-full rounded-md p-2">
-                </div>
-                <div>
-                    <label for="p2-score" class="block text-sm font-medium">Score</label>
-                     <div class="flex items-center gap-2 mt-1">
-                        <button id="p2-score-minus" class="bg-red-500 hover:bg-red-600 font-bold p-2 rounded-md w-10">-</button>
-                        <input type="number" id="p2-score" value="0" class="block w-full rounded-md p-2 text-center">
-                        <button id="p2-score-plus" class="bg-green-500 hover:bg-green-600 font-bold p-2 rounded-md w-10">+</button>
-                    </div>
-                </div>
-                 <div>
-                    <label for="p2-char" class="block text-sm font-medium">Character</label>
-                    <select id="p2-char" class="mt-1 block w-full rounded-md p-2"></select>
-                </div>
+            <div>
+                <label for="p2-character" class="block text-sm font-medium mb-1">Character</label>
+                <select id="p2-character" class="input-field"></select>
             </div>
         </div>
     </div>
 
-    <script src="firebase-config.js"></script>
+    <!-- Firebase and App Logic -->
+    <script src="./firebase-config.js"></script>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        const statusIndicator = document.getElementById('status-indicator');
-        const statusText = document.getElementById('status-text');
-        let matchDataRef;
-        const characters = {"Banjo & Kazooie":"Banjo_&_Kazooie","Bayonetta":"Bayonetta","Bowser":"Bowser","Bowser Jr.":"Bowser_Jr","Byleth":"Byleth","Captain Falcon":"Captain_Falcon","Chrom":"Chrom","Cloud":"Cloud","Corrin":"Corrin","Daisy":"Daisy","Dark Pit":"Dark_Pit","Dark Samus":"Dark_Samus","Diddy Kong":"Diddy_Kong","Donkey Kong":"Donkey_Kong","Dr. Mario":"Dr_Mario","Duck Hunt":"Duck_Hunt","Falco":"Falco","Fox":"Fox","Ganondorf":"Ganondorf","Greninja":"Greninja","Hero":"Hero","Ice Climbers":"Ice_Climbers","Ike":"Ike","Incineroar":"Incineroar","Inkling":"Inkling","Isabelle":"Isabelle","Jigglypuff":"Jigglypuff","Joker":"Joker","Kazuya":"Kazuya","Ken":"Ken","King Dedede":"King_Dedede","King K. Rool":"King_K_Rool","Kirby":"Kirby","Link":"Link","Little Mac":"Little_Mac","Lucario":"Lucario","Lucas":"Lucas","Lucina":"Lucina","Luigi":"Luigi","Mario":"Mario","Marth":"Marth","Mega Man":"Mega_Man","Meta Knight":"Meta_Knight","Mewtwo":"Mewtwo","Mii Brawler":"Mii_Brawler","Mii Gunner":"Mii_Gunner","Mii Swordfighter":"Mii_Swordfighter","Min Min":"Min_Min","Mr. Game & Watch":"Mr_Game_&_Watch","Ness":"Ness","Olimar":"Olimar","Pac-Man":"Pac-Man","Palutena":"Palutena","Peach":"Peach","Pichu":"Pichu","Pikachu":"Pikachu","Piranha Plant":"Piranha_Plant","Pit":"Pit","Pyra & Mythra":"Pyra_&_Mythra","Richter":"Richter","Ridley":"Ridley","R.O.B.":"R.O.B.","Robin":"Robin","Rosalina & Luma":"Rosalina_&_Luma","Roy":"Roy","Ryu":"Ryu","Samus":"Samus","Sephiroth":"Sephiroth","Sheik":"Sheik","Shulk":"Shulk","Simon":"Simon","Snake":"Snake","Sonic":"Sonic","Sora":"Sora","Steve":"Steve","Terry":"Terry","Toon Link":"Toon_Link","Villager":"Villager","Wario":"Wario","Wii Fit Trainer":"Wii_Fit_Trainer","Wolf":"Wolf","Yoshi":"Yoshi","Young Link":"Young_Link","Zelda":"Zelda","Zero Suit Samus":"Zero_Suit_Samus"};
-        const charBaseUrl = "https://raw.githubusercontent.com/project-slippi/stock-icon-packs/master/online-stocks-rollup/256/";
+        // --- CHARACTER DATA ---
+        const characters = ["Mario", "Donkey Kong", "Link", "Samus", "Dark Samus", "Yoshi", "Kirby", "Fox", "Pikachu", "Luigi", "Ness", "Captain Falcon", "Jigglypuff", "Peach", "Daisy", "Bowser", "Ice Climbers", "Sheik", "Zelda", "Dr. Mario", "Pichu", "Falco", "Marth", "Lucina", "Young Link", "Ganondorf", "Mewtwo", "Roy", "Chrom", "Mr. Game & Watch", "Meta Knight", "Pit", "Dark Pit", "Zero Suit Samus", "Wario", "Snake", "Ike", "Pokemon Trainer", "Diddy Kong", "Lucas", "Sonic", "King Dedede", "Olimar", "Lucario", "R.O.B.", "Toon Link", "Wolf", "Villager", "Mega Man", "Wii Fit Trainer", "Rosalina & Luma", "Little Mac", "Greninja", "Mii Brawler", "Mii Swordfighter", "Mii Gunner", "Palutena", "Pac-Man", "Robin", "Shulk", "Bowser Jr.", "Duck Hunt", "Ryu", "Ken", "Cloud", "Corrin", "Bayonetta", "Inkling", "Ridley", "Simon", "Richter", "King K. Rool", "Isabelle", "Incineroar", "Piranha Plant", "Joker", "Hero", "Banjo & Kazooie", "Terry", "Byleth", "Min Min", "Steve", "Sephiroth", "Pyra/Mythra", "Kazuya", "Sora"];
 
-        async function main() {
-            populateCharacaterDropdowns();
+        let db, auth;
+        const appId = 'stillwater-smash-overlay';
 
-            const app = initializeApp(firebaseConfig);
-            const db = getFirestore(app);
-            const auth = getAuth(app);
-            
-            try {
-                await signInAnonymously(auth);
-                statusIndicator.classList.replace('bg-yellow-500', 'bg-green-500');
-                statusText.textContent = 'Connected';
-            } catch (error) {
-                console.error("Authentication failed:", error);
-                statusIndicator.classList.replace('bg-yellow-500', 'bg-red-500');
-                statusText.textContent = 'Auth Error';
+        function setStatus(text, type) {
+            const statusText = document.getElementById('status-text');
+            const statusIndicator = document.getElementById('status-indicator');
+            statusText.textContent = text;
+            if (type === 'connecting') {
+                statusIndicator.style.backgroundColor = '#f6e05e'; // yellow
+            } else if (type === 'connected' || type === 'saved') {
+                statusIndicator.style.backgroundColor = '#48bb78'; // green
+            } else if (type === 'error') {
+                statusIndicator.style.backgroundColor = '#f56565'; // red
+            }
+        }
+
+        async function saveData() {
+            if (!auth.currentUser) {
+                console.error("Not authenticated");
+                setStatus('Auth Error', 'error');
                 return;
             }
-
-            matchDataRef = doc(db, "overlay-data", "match-1");
-            loadInitialData();
-            setupEventListeners();
-        }
-
-        function populateCharacaterDropdowns() {
-            const p1Select = document.getElementById('p1-char');
-            const p2Select = document.getElementById('p2-char');
-            for (const charName in characters) {
-                const fileName = characters[charName];
-                const option = new Option(charName, `${charBaseUrl}${fileName}.png`);
-                p1Select.add(option.cloneNode(true));
-                p2Select.add(option.cloneNode(true));
-            }
-        }
-
-        async function loadInitialData() {
             try {
-                const docSnap = await getDoc(matchDataRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    const keyToIdMap = {
-                        p1_tag: 'p1-tag', p1_status: 'p1-status', p1_score: 'p1-score', p1_char: 'p1-char',
-                        p2_tag: 'p2-tag', p2_pronouns: 'p2-pronouns', p2_status: 'p2-status', p2_score: 'p2-score', p2_char: 'p2-char',
-                        round: 'round', bestof: 'bestof'
-                    };
-                    for (const key in keyToIdMap) {
-                        const el = document.getElementById(keyToIdMap[key]);
-                        if (el && data[key] !== undefined) el.value = data[key];
-                    }
-                } else {
-                    updateFirestore();
-                }
-            } catch(error) {
-                console.error("Error loading initial data:", error);
-            }
-        }
-        
-        async function updateFirestore() {
-            if (!matchDataRef) return;
-            statusText.textContent = 'Saving...';
-            statusIndicator.classList.replace('bg-green-500', 'bg-yellow-500');
-
-            const data = {
-                p1_tag: document.getElementById('p1-tag').value,
-                p1_status: document.getElementById('p1-status').value,
-                p1_score: document.getElementById('p1-score').value,
-                p1_char: document.getElementById('p1-char').value,
-                p2_tag: document.getElementById('p2-tag').value,
-                p2_pronouns: document.getElementById('p2-pronouns').value,
-                p2_status: document.getElementById('p2-status').value,
-                p2_score: document.getElementById('p2-score').value,
-                p2_char: document.getElementById('p2-char').value,
-                round: document.getElementById('round').value,
-                bestof: document.getElementById('bestof').value,
-            };
-
-            try {
-                await setDoc(matchDataRef, data, { merge: true });
-                statusIndicator.classList.replace('bg-yellow-500', 'bg-green-500');
-                statusText.textContent = 'Saved';
+                const docRef = doc(db, "overlays", appId);
+                const data = {
+                    p1Sponsor: document.getElementById('p1-sponsor').value,
+                    p1Tag: document.getElementById('p1-tag').value,
+                    p1Pronouns: document.getElementById('p1-pronouns').value,
+                    p1Status: document.getElementById('p1-status').value,
+                    p1Score: parseInt(document.getElementById('p1-score').value) || 0,
+                    p1Character: document.getElementById('p1-character').value,
+                    p2Sponsor: document.getElementById('p2-sponsor').value,
+                    p2Tag: document.getElementById('p2-tag').value,
+                    p2Pronouns: document.getElementById('p2-pronouns').value,
+                    p2Status: document.getElementById('p2-status').value,
+                    p2Score: parseInt(document.getElementById('p2-score').value) || 0,
+                    p2Character: document.getElementById('p2-character').value,
+                    round: document.getElementById('round').value,
+                    formatType: document.getElementById('format-type').value,
+                    formatNumber: document.getElementById('format-number').value,
+                };
+                await setDoc(docRef, data, { merge: true });
+                setStatus('Saved', 'saved');
+                 setTimeout(() => setStatus('Connected', 'connected'), 2000);
             } catch (error) {
-                console.error("Error writing document:", error);
-                statusIndicator.classList.replace('bg-yellow-500', 'bg-red-500');
-                statusText.textContent = 'Save Error';
+                console.error("Error saving data: ", error);
+                setStatus('Save Error', 'error');
             }
         }
 
-        function setupEventListeners() {
-            document.getElementById('update-button').addEventListener('click', updateFirestore);
-            const allInputs = document.querySelectorAll('.controls input, .controls select');
-            allInputs.forEach(input => input.addEventListener('input', () => debounce(updateFirestore, 500)()));
-            document.getElementById('p1-score-plus').addEventListener('click', () => updateScore('p1-score', 1));
-            document.getElementById('p1-score-minus').addEventListener('click', () => updateScore('p1-score', -1));
-            document.getElementById('p2-score-plus').addEventListener('click', () => updateScore('p2-score', 1));
-            document.getElementById('p2-score-minus').addEventListener('click', () => updateScore('p2-score', -1));
-            document.getElementById('swap-players').addEventListener('click', swapPlayers);
-        }
-
-        function updateScore(inputId, amount) {
-            const scoreInput = document.getElementById(inputId);
-            scoreInput.value = Math.max(0, (parseInt(scoreInput.value, 10) || 0) + amount);
-            updateFirestore();
+        async function loadData() {
+            const docRef = doc(db, "overlays", appId);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                document.getElementById('p1-sponsor').value = data.p1Sponsor || '';
+                document.getElementById('p1-tag').value = data.p1Tag || '';
+                document.getElementById('p1-pronouns').value = data.p1Pronouns || '';
+                document.getElementById('p1-status').value = data.p1Status || '';
+                document.getElementById('p1-score').value = data.p1Score || 0;
+                document.getElementById('p1-character').value = data.p1Character || characters[0];
+                document.getElementById('p2-sponsor').value = data.p2Sponsor || '';
+                document.getElementById('p2-tag').value = data.p2Tag || '';
+                document.getElementById('p2-pronouns').value = data.p2Pronouns || '';
+                document.getElementById('p2-status').value = data.p2Status || '';
+                document.getElementById('p2-score').value = data.p2Score || 0;
+                document.getElementById('p2-character').value = data.p2Character || characters[0];
+                document.getElementById('round').value = data.round || '';
+                document.getElementById('format-type').value = data.formatType || 'Best of';
+                document.getElementById('format-number').value = data.formatNumber || '';
+            }
         }
 
         function swapPlayers() {
-            const p1Inputs = ['p1-tag', 'p1-status', 'p1-score', 'p1-char'];
-            const p2Inputs = ['p2-tag', 'p2-status', 'p2-score', 'p2-char'];
-            for (let i = 0; i < p1Inputs.length; i++) {
-                const p1Element = document.getElementById(p1Inputs[i]);
-                const p2Element = document.getElementById(p2Inputs[i]);
-                [p1Element.value, p2Element.value] = [p2Element.value, p1Element.value];
-            }
-            const p2Pronouns = document.getElementById('p2-pronouns');
-            p2Pronouns.value = ''; // Simplified swap, clears p2 pronouns
-            updateFirestore();
+            const p1Sponsor = document.getElementById('p1-sponsor').value;
+            const p1Tag = document.getElementById('p1-tag').value;
+            const p1Pronouns = document.getElementById('p1-pronouns').value;
+            const p1Status = document.getElementById('p1-status').value;
+            const p1Score = document.getElementById('p1-score').value;
+            const p1Character = document.getElementById('p1-character').value;
+
+            const p2Sponsor = document.getElementById('p2-sponsor').value;
+            const p2Tag = document.getElementById('p2-tag').value;
+            const p2Pronouns = document.getElementById('p2-pronouns').value;
+            const p2Status = document.getElementById('p2-status').value;
+            const p2Score = document.getElementById('p2-score').value;
+            const p2Character = document.getElementById('p2-character').value;
+            
+            document.getElementById('p1-sponsor').value = p2Sponsor;
+            document.getElementById('p1-tag').value = p2Tag;
+            document.getElementById('p1-pronouns').value = p2Pronouns;
+            document.getElementById('p1-status').value = p2Status;
+            document.getElementById('p1-score').value = p2Score;
+            document.getElementById('p1-character').value = p2Character;
+
+            document.getElementById('p2-sponsor').value = p1Sponsor;
+            document.getElementById('p2-tag').value = p1Tag;
+            document.getElementById('p2-pronouns').value = p1Pronouns;
+            document.getElementById('p2-status').value = p1Status;
+            document.getElementById('p2-score').value = p1Score;
+            document.getElementById('p2-character').value = p1Character;
+
+            saveData();
         }
 
-        let timeout;
-        function debounce(func, wait) {
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), wait);
-            };
+        function setupEventListeners() {
+            document.querySelectorAll('input, select').forEach(el => {
+                el.addEventListener('change', saveData);
+                el.addEventListener('keyup', saveData);
+            });
+            document.getElementById('force-update').addEventListener('click', saveData);
+            document.getElementById('swap-players').addEventListener('click', swapPlayers);
+            
+            // Score buttons
+            document.getElementById('p1-score-up').addEventListener('click', () => {
+                document.getElementById('p1-score').value++;
+                saveData();
+            });
+             document.getElementById('p1-score-down').addEventListener('click', () => {
+                document.getElementById('p1-score').value--;
+                saveData();
+            });
+            document.getElementById('p2-score-up').addEventListener('click', () => {
+                document.getElementById('p2-score').value++;
+                saveData();
+            });
+             document.getElementById('p2-score-down').addEventListener('click', () => {
+                document.getElementById('p2-score').value--;
+                saveData();
+            });
         }
+
+        async function main() {
+            setStatus('Connecting...', 'connecting');
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    setStatus('Connected', 'connected');
+                    await loadData();
+                    setupEventListeners();
+                } else {
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (error) {
+                         console.error("Anonymous sign-in failed: ", error);
+                         setStatus('Auth Error', 'error');
+                    }
+                }
+            });
+        }
+
+        // Initialize Character Dropdowns
+        const p1CharSelect = document.getElementById('p1-character');
+        const p2CharSelect = document.getElementById('p2-character');
+        characters.forEach(char => {
+            const option1 = new Option(char, char);
+            const option2 = new Option(char, char);
+            p1CharSelect.add(option1);
+            p2CharSelect.add(option2);
+        });
 
         main();
     </script>
