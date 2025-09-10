@@ -97,18 +97,20 @@
             align-items: flex-end;
         }
         .player-tag {
-            font-size: 2rem;
+            /* Base font size, will be adjusted by JS */
+            font-size: 2rem; 
             line-height: 1.1;
             display: flex;
             align-items: center;
             gap: 8px;
             min-width: 0;
+            /* Add transition for smooth size changes */
+            transition: font-size 0.2s ease-in-out;
         }
-        /* Shared style for all secondary text (sponsors, pronouns) */
         .secondary-text {
             font-family: 'Roboto Slab', serif;
             font-weight: 400;
-            color: #e5e7eb; /* A brighter light gray */
+            color: #e5e7eb;
             text-transform: none;
         }
         .sponsor-tag {
@@ -118,26 +120,21 @@
             font-size: 1rem;
             line-height: 1;
         }
-
-        /* Text that can be truncated needs these styles */
         .truncatable {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
-        /* The Winners/Losers status box */
         .player-status {
             position: absolute;
             bottom: -18px;
             background-color: #f0f0f0;
-            color: #212121; /* Darker, more readable gray */
+            color: #212121;
             padding: 2px 10px;
             font-size: 0.8rem;
             font-weight: 700;
             border: 2px solid black;
         }
-        /* Positioned relative to the main bar's edges now */
         #p1-status { left: 5px; }
         #p2-status { right: 5px; }
 
@@ -163,7 +160,8 @@
         }
         .match-info-box {
             position: absolute;
-            bottom: -25px;
+            /* Pushed down to prevent clipping with logo */
+            bottom: -35px; 
             left: 50%;
             transform: translateX(-50%);
             background-color: #fff;
@@ -188,7 +186,8 @@
                 <div class="tag-container">
                     <div id="p1-tag" class="player-tag">
                         <span id="p1-sponsor-display" class="sponsor-tag secondary-text truncatable"></span>
-                        <span id="p1-tag-display" class="text-stroke truncatable">Player 1</span>
+                        <!-- Removed truncatable from here so it can shrink -->
+                        <span id="p1-tag-display" class="text-stroke">Player 1</span>
                     </div>
                     <div id="p1-pronouns-display" class="player-pronouns secondary-text truncatable"></div>
                 </div>
@@ -203,7 +202,8 @@
                 <div class="tag-container">
                     <div id="p2-tag" class="player-tag">
                          <span id="p2-sponsor-display" class="sponsor-tag secondary-text truncatable"></span>
-                         <span id="p2-tag-display" class="text-stroke truncatable">Player 2</span>
+                         <!-- Removed truncatable from here so it can shrink -->
+                         <span id="p2-tag-display" class="text-stroke">Player 2</span>
                     </div>
                     <div id="p2-pronouns-display" class="player-pronouns secondary-text truncatable"></div>
                 </div>
@@ -216,7 +216,8 @@
 
         <!-- Center Elements -->
         <div class="center-logo">
-             <img src="https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/image-49af268bae598446aa854e181f04f470.png" alt="Logo" class="logo-img">
+             <!-- Corrected the image URL by removing the non-existent 'images' folder -->
+             <img src="https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/image-49af268bae598446aa854e181f04f470.png" alt="Logo" class="logo-img">
         </div>
         <div class="match-info-box">
             <div id="round-display">Grand Finals</div>
@@ -250,6 +251,26 @@
              }
         }
 
+        // NEW function to dynamically shrink font size for long tags
+        function adjustPlayerTagSize(tagElementId, sponsorText, tagText) {
+            const tagElement = document.getElementById(tagElementId);
+            if (!tagElement) return;
+
+            const totalLength = (sponsorText || '').length + (tagText || '').length;
+            const baseSize = 2; // base font size in rem
+            let newSize = baseSize;
+
+            // Define thresholds for shrinking the font
+            if (totalLength > 22) {
+                newSize = 1.5; // Shrink significantly for very long names
+            } else if (totalLength > 16) {
+                newSize = 1.75; // Shrink slightly for medium-long names
+            }
+            
+            tagElement.style.fontSize = `${newSize}rem`;
+        }
+
+
         async function main() {
             const app = initializeApp(firebaseConfig);
             const db = getFirestore(app);
@@ -262,6 +283,7 @@
                     onSnapshot(docRef, (doc) => {
                         if (doc.exists()) {
                             const data = doc.data();
+                            
                             // Player 1
                             updateField('p1-sponsor-display', data.p1Sponsor);
                             updateField('p1-tag-display', data.p1Tag, 'Player 1');
@@ -269,6 +291,7 @@
                             updateField('p1-status', data.p1Status);
                             updateField('p1-score', data.p1Score);
                             updateCharacterIcon('p1-char-icon', data.p1Character);
+                            adjustPlayerTagSize('p1-tag', data.p1Sponsor, data.p1Tag); // Adjust font size
 
                             // Player 2
                             updateField('p2-sponsor-display', data.p2Sponsor);
@@ -277,6 +300,7 @@
                             updateField('p2-status', data.p2Status);
                             updateField('p2-score', data.p2Score);
                             updateCharacterIcon('p2-char-icon', data.p2Character);
+                            adjustPlayerTagSize('p2-tag', data.p2Sponsor, data.p2Tag); // Adjust font size
 
                             // Match Info
                             updateField('round-display', data.round);
