@@ -152,15 +152,15 @@
             align-items: center;
             border: 5px solid #FF6600;
             z-index: 10;
-        }
-        .logo-img {
-            width: 90%;
-            height: 90%;
-            object-fit: contain;
+            /* NEW styles for background image */
+            background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/shieldpokeslogo.png');
+            background-size: 115%; /* Zoom in to hide transparent edges */
+            background-position: center;
+            background-repeat: no-repeat;
         }
         .match-info-box {
             position: absolute;
-            /* Pushed down even further to prevent clipping */
+            /* Pushed down to prevent clipping */
             bottom: -45px; 
             left: 50%;
             transform: translateX(-50%);
@@ -216,8 +216,7 @@
 
         <!-- Center Elements -->
         <div class="center-logo">
-             <!-- Corrected the image URL to your new one -->
-             <img src="https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/shieldpokeslogo.png" alt="Logo" class="logo-img">
+             <!-- The img tag is no longer needed, logo is a background now -->
         </div>
         <div class="match-info-box">
             <div id="round-display">Grand Finals</div>
