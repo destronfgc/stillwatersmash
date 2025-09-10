@@ -160,8 +160,8 @@
         }
         .match-info-box {
             position: absolute;
-            /* Pushed down to prevent clipping with logo */
-            bottom: -35px; 
+            /* Pushed down even further to prevent clipping */
+            bottom: -45px; 
             left: 50%;
             transform: translateX(-50%);
             background-color: #fff;
@@ -216,8 +216,8 @@
 
         <!-- Center Elements -->
         <div class="center-logo">
-             <!-- Corrected the image URL by removing the non-existent 'images' folder -->
-             <img src="https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/image-49af268bae598446aa854e181f04f470.png" alt="Logo" class="logo-img">
+             <!-- Corrected the image URL to your new one -->
+             <img src="https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/shieldpokeslogo.png" alt="Logo" class="logo-img">
         </div>
         <div class="match-info-box">
             <div id="round-display">Grand Finals</div>
@@ -260,11 +260,13 @@
             const baseSize = 2; // base font size in rem
             let newSize = baseSize;
 
-            // Define thresholds for shrinking the font
-            if (totalLength > 22) {
-                newSize = 1.5; // Shrink significantly for very long names
+            // More aggressive scaling for very long names
+            if (totalLength > 28) {
+                newSize = 1.2;
+            } else if (totalLength > 22) {
+                newSize = 1.5; 
             } else if (totalLength > 16) {
-                newSize = 1.75; // Shrink slightly for medium-long names
+                newSize = 1.75;
             }
             
             tagElement.style.fontSize = `${newSize}rem`;
