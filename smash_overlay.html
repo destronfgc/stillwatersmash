@@ -17,7 +17,7 @@
             overflow: hidden;
         }
         .text-stroke {
-            -webkit-text-stroke: 2px black;
+            -webkit-text-stroke: 1.5px black;
             paint-order: stroke fill;
         }
         .main-bar {
@@ -34,8 +34,6 @@
             height: 60px;
             display: flex;
             align-items: center;
-            /* Add overflow hidden to clip any escaping text */
-            overflow: hidden; 
         }
         #p1-info {
             left: 0;
@@ -74,15 +72,12 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            /* Allow this container to shrink if content is too wide */
             flex-shrink: 1;
             min-width: 0;
-            padding-right: 15px; /* Add padding to prevent text hitting the edge */
+            padding: 0 15px;
         }
          #p2-info .player-details {
             flex-direction: row-reverse;
-            padding-right: 0;
-            padding-left: 15px;
         }
         .char-icon {
             width: 48px;
@@ -90,56 +85,59 @@
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            /* Prevent icon from shrinking */
             flex-shrink: 0;
         }
         .tag-container {
             display: flex;
             flex-direction: column;
-            /* Allow this container to shrink */
             flex-shrink: 1;
             min-width: 0;
         }
         #p2-info .tag-container {
             align-items: flex-end;
         }
-        .player-tag, .player-pronouns {
-            /* Prevent text from wrapping to a new line */
-            white-space: nowrap;
-            /* Hide overflow with an ellipsis */
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
         .player-tag {
-            font-size: 2rem; /* 32px */
-            line-height: 1;
+            font-size: 2rem;
+            line-height: 1.1;
             display: flex;
             align-items: center;
             gap: 8px;
+            min-width: 0;
+        }
+        /* Shared style for all secondary text (sponsors, pronouns) */
+        .secondary-text {
+            font-family: 'Roboto Slab', serif;
+            font-weight: 400;
+            color: #e5e7eb; /* A brighter light gray */
+            text-transform: none;
         }
         .sponsor-tag {
-            color: #d1d5db; /* Lighter gray for sponsor */
-            font-weight: 400;
-            font-family: 'Roboto Slab', serif;
-            font-size: 1.5rem; /* 24px */
+            font-size: 1.5rem;
         }
         .player-pronouns {
-            font-size: 1rem; /* 16px */
-            font-family: 'Roboto Slab', serif;
+            font-size: 1rem;
             line-height: 1;
-            font-weight: 400;
-            color: #d1d5db;
         }
+
+        /* Text that can be truncated needs these styles */
+        .truncatable {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* The Winners/Losers status box */
         .player-status {
             position: absolute;
             bottom: -18px;
             background-color: #f0f0f0;
-            color: #333;
+            color: #212121; /* Darker, more readable gray */
             padding: 2px 10px;
             font-size: 0.8rem;
             font-weight: 700;
             border: 2px solid black;
         }
+        /* Positioned relative to the main bar's edges now */
         #p1-status { left: 5px; }
         #p2-status { right: 5px; }
 
@@ -188,14 +186,13 @@
             <div class="player-details">
                 <div id="p1-char-icon" class="char-icon"></div>
                 <div class="tag-container">
-                    <div id="p1-tag" class="player-tag text-stroke">
-                        <span id="p1-sponsor-display" class="sponsor-tag"></span>
-                        <span id="p1-tag-display">Player 1</span>
+                    <div id="p1-tag" class="player-tag">
+                        <span id="p1-sponsor-display" class="sponsor-tag secondary-text truncatable"></span>
+                        <span id="p1-tag-display" class="text-stroke truncatable">Player 1</span>
                     </div>
-                    <div id="p1-pronouns-display" class="player-pronouns text-stroke"></div>
+                    <div id="p1-pronouns-display" class="player-pronouns secondary-text truncatable"></div>
                 </div>
             </div>
-            <div id="p1-status" class="player-status">Winners</div>
         </div>
 
         <!-- Player 2 -->
@@ -204,15 +201,18 @@
              <div class="player-details">
                 <div id="p2-char-icon" class="char-icon"></div>
                 <div class="tag-container">
-                    <div id="p2-tag" class="player-tag text-stroke">
-                         <span id="p2-sponsor-display" class="sponsor-tag"></span>
-                         <span id="p2-tag-display">Player 2</span>
+                    <div id="p2-tag" class="player-tag">
+                         <span id="p2-sponsor-display" class="sponsor-tag secondary-text truncatable"></span>
+                         <span id="p2-tag-display" class="text-stroke truncatable">Player 2</span>
                     </div>
-                    <div id="p2-pronouns-display" class="player-pronouns text-stroke"></div>
+                    <div id="p2-pronouns-display" class="player-pronouns secondary-text truncatable"></div>
                 </div>
             </div>
-            <div id="p2-status" class="player-status">Losers</div>
         </div>
+
+        <!-- Status boxes are now outside the player-info containers to prevent clipping -->
+        <div id="p1-status" class="player-status">Winners</div>
+        <div id="p2-status" class="player-status">Losers</div>
 
         <!-- Center Elements -->
         <div class="center-logo">
