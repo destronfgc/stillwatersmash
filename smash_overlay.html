@@ -34,6 +34,8 @@
             height: 60px;
             display: flex;
             align-items: center;
+            /* Add overflow hidden to clip any escaping text */
+            overflow: hidden; 
         }
         #p1-info {
             left: 0;
@@ -72,9 +74,15 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            /* Allow this container to shrink if content is too wide */
+            flex-shrink: 1;
+            min-width: 0;
+            padding-right: 15px; /* Add padding to prevent text hitting the edge */
         }
          #p2-info .player-details {
             flex-direction: row-reverse;
+            padding-right: 0;
+            padding-left: 15px;
         }
         .char-icon {
             width: 48px;
@@ -82,13 +90,25 @@
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
+            /* Prevent icon from shrinking */
+            flex-shrink: 0;
         }
         .tag-container {
             display: flex;
             flex-direction: column;
+            /* Allow this container to shrink */
+            flex-shrink: 1;
+            min-width: 0;
         }
         #p2-info .tag-container {
             align-items: flex-end;
+        }
+        .player-tag, .player-pronouns {
+            /* Prevent text from wrapping to a new line */
+            white-space: nowrap;
+            /* Hide overflow with an ellipsis */
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .player-tag {
             font-size: 2rem; /* 32px */
@@ -196,7 +216,7 @@
 
         <!-- Center Elements -->
         <div class="center-logo">
-             <img src="https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/image-49af268bae5P98446aa854e181f04f470.png" alt="Logo" class="logo-img">
+             <img src="https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/image-49af268bae598446aa854e181f04f470.png" alt="Logo" class="logo-img">
         </div>
         <div class="match-info-box">
             <div id="round-display">Grand Finals</div>
