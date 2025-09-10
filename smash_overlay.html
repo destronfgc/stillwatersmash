@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smash Bros. Ultimate OBS Overlay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Roboto Slab', serif; background-color: transparent; color: white; }
+        .font-headline { font-family: 'Oswald', sans-serif; }
+        .player-bar { background-color: #1a1a1a; }
+        .player-name-red { color: #FF7300; }
+        .player-name-blue { color: #FFFFFF; }
+        .underline-red { background-color: #FF7300; }
+        .underline-blue { background-color: #000000; }
+        .info-box { background-color: #FFFFFF; color: #000000; }
+        ::-webkit-scrollbar { display: none; }
+        html, body { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="p-8">
+
+    <div id="overlay-container" class="relative flex justify-center items-start w-full max-w-7xl mx-auto mt-4">
+        <div class="absolute z-10 top-0 flex flex-col items-center">
+            <div class="bg-[#1a1a1a] rounded-full border-4 border-[#FF7300] shadow-lg flex items-center justify-center overflow-hidden w-[96px] h-[96px]">
+                <img id="display-logo" src="https://raw.githubusercontent.com/destronfgc/stillwatersmash/images/image-49af268bae598446aa854e181f04f470.png" alt="Custom Logo" class="object-cover w-full h-full">
+            </div>
+            <div class="info-box font-bold text-xl uppercase tracking-wider -mt-4 rounded-lg shadow-lg px-6 py-2 flex gap-12">
+                <span id="display-round"></span>
+                <span id="display-bestof"></span>
+            </div>
+        </div>
+        <div class="w-full flex justify-center items-start pt-8">
+            <div class="w-1/2 flex flex-col items-end">
+                <div class="player-bar rounded-l-lg w-full max-w-2xl h-16 flex items-center pr-16">
+                    <div class="bg-white text-black text-5xl font-extrabold w-20 h-full flex items-center justify-center rounded-l-lg font-headline">
+                        <span id="display-p1-score"></span>
+                    </div>
+                    <div class="flex items-center gap-3 ml-4">
+                        <img id="display-p1-char" src="" alt="P1 Char" class="h-12 w-12">
+                        <span id="display-p1-tag" class="text-3xl font-bold player-name-red uppercase tracking-wide font-headline"></span>
+                    </div>
+                </div>
+                <div class="w-full max-w-2xl flex justify-between items-center pr-16">
+                    <div class="underline-red w-full"></div>
+                    <div id="display-p1-status" class="bg-gray-700 text-sm font-semibold uppercase px-3 py-1 -mt-3 ml-4 rounded-b-md"></div>
+                </div>
+            </div>
+            <div class="w-1/2 flex flex-col items-start">
+                <div class="player-bar rounded-r-lg w-full max-w-2xl h-16 flex items-center justify-end pl-16">
+                     <div class="flex items-center gap-3 mr-4 text-right">
+                        <div>
+                           <span id="display-p2-tag" class="text-3xl font-bold player-name-blue uppercase tracking-wide font-headline"></span>
+                           <span id="display-p2-pronouns" class="text-base font-light text-gray-300 block -mt-1"></span>
+                        </div>
+                        <img id="display-p2-char" src="" alt="P2 Char" class="h-12 w-12">
+                    </div>
+                    <div class="bg-white text-black text-5xl font-extrabold w-20 h-full flex items-center justify-center rounded-r-lg font-headline">
+                        <span id="display-p2-score"></span>
+                    </div>
+                </div>
+                <div class="w-full max-w-2xl flex justify-between items-center pl-16">
+                    <div id="display-p2-status" class="bg-gray-700 text-sm font-semibold uppercase px-3 py-1 -mt-3 mr-4 rounded-b-md"></div>
+                    <div class="underline-blue w-full"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="firebase-config.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        async function main() {
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Authentication failed:", error);
+                return;
+            }
+
+            const matchDataRef = doc(db, "overlay-data", "match-1");
+
+            onSnapshot(matchDataRef, (doc) => {
+                if (doc.exists()) {
+                    updateDisplay(doc.data());
+                }
+            });
+        }
+        
+        function updateDisplay(data) {
+            const updateText = (id, value) => { document.getElementById(id).innerText = value || ''; };
+            const updateImage = (id, url) => {
+                const el = document.getElementById(id);
+                const placeholder = 'https://placehold.co/256x256/1a1a1a/1a1a1a?text=_';
+                el.src = url || placeholder;
+                el.onerror = () => { el.src = placeholder; };
+            };
+            
+            updateText('display-p1-tag', data.p1_tag);
+            updateText('display-p1-status', data.p1_status);
+            updateText('display-p1-score', data.p1_score);
+            updateImage('display-p1-char', data.p1_char);
+            updateText('display-p2-tag', data.p2_tag);
+            updateText('display-p2-pronouns', data.p2_pronouns);
+            updateText('display-p2-status', data.p2_status);
+            updateText('display-p2-score', data.p2_score);
+            updateImage('display-p2-char', data.p2_char);
+            updateText('display-round', data.round);
+            updateText('display-bestof', data.bestof);
+        }
+
+        main();
+    </script>
+</body>
+</html>
+
