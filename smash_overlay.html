@@ -20,12 +20,14 @@
             text-transform: uppercase;
             font-weight: 700;
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+            transition: font-size 0.2s ease-in-out;
         }
         .secondary-text {
             font-family: 'Roboto Slab', serif;
             text-transform: uppercase;
             font-size: 0.9rem;
             letter-spacing: 0.05em;
+            transition: font-size 0.2s ease-in-out;
         }
         .score-box {
             background-color: white;
@@ -35,7 +37,6 @@
             width: 80px;
             height: 80px;
         }
-        /* Mirrored clip-paths for symmetry */
         .p1-score-box {
             clip-path: polygon(0 0, 100% 0, 100% 100%, 25% 100%, 0 75%);
         }
@@ -54,8 +55,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* Added a version number to the URL to force a fresh download */
-            background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/shieldpokeslogo.png?v=2');
+            /* Using the direct raw content URL to ensure it loads */
+            background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/shieldpokeslogo.png');
             background-size: 115%; 
             background-position: center;
             background-repeat: no-repeat;
@@ -89,14 +90,14 @@
                     </div>
                     <span id="p1Pronouns" class="secondary-text text-gray-200 text-sm"></span>
                 </div>
-                <img id="p1Character" src="https://placehold.co/80x80/FF7300/FF7300" class="h-[70px] w-auto ml-3">
+                <img id="p1Character" src="https://placehold.co/80x80/FF7300/FF7300?text=" class="h-[70px] w-auto ml-3">
             </div>
         </div>
         
         <!-- Player 2 Group -->
         <div class="h-full flex items-center">
              <div class="p2-bar h-[70px] flex items-center justify-start pl-4" style="width: 450px;">
-                 <img id="p2Character" src="https://placehold.co/80x80/232323/232323" class="h-[70px] w-auto mr-3">
+                 <img id="p2Character" src="https://placehold.co/80x80/232323/232323?text=" class="h-[70px] w-auto mr-3">
                  <div class="flex flex-col items-start text-left overflow-hidden">
                     <div id="p2-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
                         <span id="p2Sponsor" class="secondary-text text-gray-400" style="font-size: 1.2rem;"></span>
@@ -124,7 +125,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // Ensure this points to your corrected config file
         import { firebaseConfig } from './firebase-config.js';
 
         const characters = {
@@ -164,15 +164,15 @@
             document.getElementById('p2Score').textContent = data.p2Score ?? 0;
             
             document.getElementById('round').textContent = data.round || 'Grand Finals';
-            document.getElementById('format').textContent = data.format || 'Best of 5';
+            const [formatType, formatNumber] = (data.format || 'Best of 5').split(' ');
+            document.getElementById('format').textContent = `${data.formatPrefix || 'Best of'} ${data.formatNumber || 5}`;
 
             const p1CharFile = characters[data.p1Character];
-            if (p1CharFile) document.getElementById('p1Character').src = `${stockIconBaseUrl}${p1CharFile}.png`;
+            document.getElementById('p1Character').src = p1CharFile ? `${stockIconBaseUrl}${p1CharFile}.png` : 'https://placehold.co/80x80/FF7300/FF7300?text=';
             
             const p2CharFile = characters[data.p2Character];
-            if (p2CharFile) document.getElementById('p2Character').src = `${stockIconBaseUrl}${p2CharFile}.png`;
+            document.getElementById('p2Character').src = p2CharFile ? `${stockIconBaseUrl}${p2CharFile}.png` : 'https://placehold.co/80x80/232323/232323?text=';
 
-            // Adjust font size after a short delay to allow rendering
             setTimeout(() => {
                 adjustFontSize('p1-name-container');
                 adjustFontSize('p2-name-container');
@@ -184,17 +184,17 @@
             const sponsor = container.querySelector('span:first-child');
             const tag = container.querySelector('span:last-child');
             
-            // Reset styles first
+            // Reset styles first to get accurate measurement
             tag.style.fontSize = '2.2rem';
             sponsor.style.fontSize = '1.2rem';
 
             const totalWidth = sponsor.offsetWidth + tag.offsetWidth;
             const maxWidth = 420;
 
-            if (totalWidth > maxWidth) {
+            if (totalWidth > maxWidth * 1.05) { // Added 5% buffer
                  const scale = maxWidth / totalWidth;
-                 const newTagSize = Math.max(1.5, 2.2 * scale);
-                 const newSponsorSize = Math.max(0.9, 1.2 * scale);
+                 const newTagSize = Math.max(1.4, 2.2 * scale);
+                 const newSponsorSize = Math.max(0.8, 1.2 * scale);
                  tag.style.fontSize = `${newTagSize}rem`;
                  sponsor.style.fontSize = `${newSponsorSize}rem`;
             }
