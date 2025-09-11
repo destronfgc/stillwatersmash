@@ -3,323 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smash Bros. Ultimate Overlay</title>
+    <title>Smash Bros. Ultimate OBS Overlay</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             background-color: transparent;
-            font-family: 'Oswald', sans-serif;
-            text-transform: uppercase;
+            font-family: 'Roboto Slab', serif;
             color: white;
             overflow: hidden;
+            width: 1920px;
+            height: 1080px;
         }
-        .text-stroke {
-            -webkit-text-stroke: 1.5px black;
-            paint-order: stroke fill;
-        }
-        .main-bar {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 1200px;
-            height: 70px;
-        }
-        .player-info {
-            position: absolute;
-            width: 500px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-        }
-        #p1-info {
-            left: 0;
-            background: linear-gradient(to right, #FF6600, #CF4520);
-            padding-left: 70px; /* Space for score */
-        }
-        #p2-info {
-            right: 0;
-            background: linear-gradient(to left, #000000, #333333);
-            flex-direction: row-reverse;
-            padding-right: 70px; /* Space for score */
-        }
-        .score-box {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2.5rem; /* 40px */
+        .player-tag-text {
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
             font-weight: 700;
-        }
-        #p1-score {
-            left: 0;
-            background-color: #f0f0f0;
-            color: #FF6600;
-            border: 3px solid #FF6600;
-        }
-        #p2-score {
-            right: 0;
-            background-color: #f0f0f0;
-            color: #000000;
-            border: 3px solid #000000;
-        }
-        .player-details {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-shrink: 1;
-            min-width: 0;
-            padding: 0 15px;
-        }
-         #p2-info .player-details {
-            flex-direction: row-reverse;
-        }
-        .char-icon {
-            width: 48px;
-            height: 48px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            flex-shrink: 0;
-        }
-        .tag-container {
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 1;
-            min-width: 0;
-        }
-        #p2-info .tag-container {
-            align-items: flex-end;
-        }
-        .player-tag {
-            /* Base font size, will be adjusted by JS */
-            font-size: 2rem; 
-            line-height: 1.1;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 0;
-            /* Add transition for smooth size changes */
-            transition: font-size 0.2s ease-in-out;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
         }
         .secondary-text {
             font-family: 'Roboto Slab', serif;
-            font-weight: 400;
-            color: #e5e7eb;
-            text-transform: none;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
         }
-        .sponsor-tag {
-            font-size: 1.5rem;
-        }
-        .player-pronouns {
-            font-size: 1rem;
-            line-height: 1;
-        }
-        .truncatable {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .player-status {
-            position: absolute;
-            bottom: -18px;
-            background-color: #f0f0f0;
-            color: #212121;
-            padding: 2px 10px;
-            font-size: 0.8rem;
+        .score-box {
+            background-color: white;
+            color: #FF7300; /* OSU Orange */
+            font-family: 'Oswald', sans-serif;
             font-weight: 700;
-            border: 2px solid black;
-        }
-        #p1-status { left: 5px; }
-        #p2-status { right: 5px; }
-
-        .center-logo {
-            position: absolute;
-            left: 50%;
-            top: -5px;
-            transform: translateX(-50%);
             width: 80px;
             height: 80px;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 25% 100%, 0 75%);
+        }
+        .p1-bar { background-color: #FF7300; /* OSU Orange */ }
+        .p2-bar { background-color: #232323; /* OSU Black */ border: 2px solid #555; }
+
+        .center-logo {
+            width: 110px;
+            height: 110px;
+            background-color: white;
             border-radius: 50%;
-            background-color: #fff;
+            border: 8px solid #FF7300; /* OSU Orange */
             display: flex;
-            justify-content: center;
             align-items: center;
-            border: 5px solid #FF6600;
-            z-index: 10;
-            /* NEW styles for background image */
-            background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/shieldpokeslogo.png');
+            justify-content: center;
+            /* Logo as background */
+            background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/shieldpokeslogo.png');
             background-size: 115%; /* Zoom in to hide transparent edges */
             background-position: center;
             background-repeat: no-repeat;
         }
+
         .match-info-box {
-            position: absolute;
-            /* Pushed down to prevent clipping */
-            bottom: -45px; 
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #fff;
-            color: #000;
-            padding: 5px 20px;
-            display: flex;
-            gap: 20px;
-            font-family: 'Roboto Slab', serif;
+            background-color: white;
+            color: #232323; /* OSU Black */
+            font-family: 'Oswald', sans-serif;
             font-weight: 700;
-            font-size: 1rem;
-            border: 3px solid black;
+            text-transform: uppercase;
         }
     </style>
 </head>
-<body>
-    <div class="main-bar">
+<body class="flex items-start justify-center pt-8">
+
+    <!-- Main Overlay Container -->
+    <div class="w-[1200px] h-[120px] flex items-center justify-center relative">
+        
         <!-- Player 1 -->
-        <div id="p1-info" class="player-info">
-            <div id="p1-score" class="score-box text-stroke">0</div>
-            <div class="player-details">
-                <div id="p1-char-icon" class="char-icon"></div>
-                <div class="tag-container">
-                    <div id="p1-tag" class="player-tag">
-                        <span id="p1-sponsor-display" class="sponsor-tag secondary-text truncatable"></span>
-                        <!-- Removed truncatable from here so it can shrink -->
-                        <span id="p1-tag-display" class="text-stroke">Player 1</span>
-                    </div>
-                    <div id="p1-pronouns-display" class="player-pronouns secondary-text truncatable"></div>
-                </div>
+        <div class="h-full flex items-center">
+            <div class="score-box flex flex-col items-center justify-center">
+                <span id="p1Score" class="text-4xl leading-none">0</span>
+                <span id="p1Status" class="secondary-text text-black text-xs -mt-1">Winners</span>
             </div>
+            <div class="p1-bar h-[70px] flex items-center justify-end pr-4" style="width: 450px;">
+                <div class="flex flex-col items-end text-right overflow-hidden">
+                    <div id="p1-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
+                        <span id="p1Sponsor" class="secondary-text text-gray-200" style="font-size: 1.2rem;"></span>
+                        <span id="p1Tag" class="player-tag-text" style="font-size: 2.2rem;">Player 1</span>
+                    </div>
+                    <span id="p1Pronouns" class="secondary-text text-gray-200 text-sm"></span>
+                </div>
+                <img id="p1Character" src="https://placehold.co/80x80/FF7300/FF7300" class="h-[70px] w-auto ml-3">
+            </div>
+        </div>
+
+        <!-- Centerpiece -->
+        <div class="absolute bottom-[-15px] z-10 flex flex-col items-center">
+             <div class="center-logo"></div>
+             <div class="match-info-box px-4 py-1 rounded-md text-center -mt-2">
+                 <span id="round">Grand Finals</span> | <span id="format">Best of 5</span>
+             </div>
         </div>
 
         <!-- Player 2 -->
-        <div id="p2-info" class="player-info">
-            <div id="p2-score" class="score-box text-stroke">0</div>
-             <div class="player-details">
-                <div id="p2-char-icon" class="char-icon"></div>
-                <div class="tag-container">
-                    <div id="p2-tag" class="player-tag">
-                         <span id="p2-sponsor-display" class="sponsor-tag secondary-text truncatable"></span>
-                         <!-- Removed truncatable from here so it can shrink -->
-                         <span id="p2-tag-display" class="text-stroke">Player 2</span>
+        <div class="h-full flex items-center">
+             <div class="p2-bar h-[70px] flex items-center justify-start pl-4" style="width: 450px;">
+                 <img id="p2Character" src="https://placehold.co/80x80/232323/232323" class="h-[70px] w-auto mr-3">
+                 <div class="flex flex-col items-start text-left overflow-hidden">
+                    <div id="p2-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
+                        <span id="p2Sponsor" class="secondary-text text-gray-400" style="font-size: 1.2rem;"></span>
+                        <span id="p2Tag" class="player-tag-text" style="font-size: 2.2rem;">Player 2</span>
                     </div>
-                    <div id="p2-pronouns-display" class="player-pronouns secondary-text truncatable"></div>
+                    <span id="p2Pronouns" class="secondary-text text-gray-400 text-sm"></span>
                 </div>
             </div>
-        </div>
-
-        <!-- Status boxes are now outside the player-info containers to prevent clipping -->
-        <div id="p1-status" class="player-status">Winners</div>
-        <div id="p2-status" class="player-status">Losers</div>
-
-        <!-- Center Elements -->
-        <div class="center-logo">
-             <!-- The img tag is no longer needed, logo is a background now -->
-        </div>
-        <div class="match-info-box">
-            <div id="round-display">Grand Finals</div>
-            <div id="format-display">Best of 5</div>
+            <div class="score-box flex flex-col items-center justify-center">
+                <span id="p2Score" class="text-4xl leading-none">0</span>
+                <span id="p2Status" class="secondary-text text-black text-xs -mt-1">Losers</span>
+            </div>
         </div>
     </div>
 
-    <!-- Firebase and App Logic -->
-    <script src="./firebase-config.js"></script>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        // --- Firebase Logic ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { firebaseConfig } from './firebase-config.js';
 
-        const stockIconUrlBase = 'https://www.ssbwiki.com/images/thumb/1/11/SSBU_stock_icon_{CHARACTER}.png/60px-SSBU_stock_icon_{CHARACTER}.png';
+        // --- Character Data (for image URLs) ---
+        const characters = {
+            "Banjo & Kazooie": "Banjo_&_Kazooie", "Bayonetta": "Bayonetta", "Bowser": "Bowser", "Bowser Jr.": "Bowser_Jr",
+            "Byleth": "Byleth", "Captain Falcon": "Captain_Falcon", "Chrom": "Chrom", "Cloud": "Cloud", "Corrin": "Corrin",
+            "Daisy": "Daisy", "Dark Pit": "Dark_Pit", "Dark Samus": "Dark_Samus", "Diddy Kong": "Diddy_Kong",
+            "Donkey Kong": "Donkey_Kong", "Dr. Mario": "Dr_Mario", "Duck Hunt": "Duck_Hunt", "Falco": "Falco",
+            "Fox": "Fox", "Ganondorf": "Ganondorf", "Greninja": "Greninja", "Hero": "Hero", "Ice Climbers": "Ice_Climbers",
+            "Ike": "Ike", "Incineroar": "Incineroar", "Inkling": "Inkling", "Isabelle": "Isabelle", "Jigglypuff": "Jigglypuff",
+            "Joker": "Joker", "Kazuya": "Kazuya", "Ken": "Ken", "King Dedede": "King_Dedede", "King K. Rool": "King_K_Rool",
+            "Kirby": "Kirby", "Link": "Link", "Little Mac": "Little_Mac", "Lucario": "Lucario", "Lucas": "Lucas",
+            "Lucina": "Lucina", "Luigi": "Luigi", "Mario": "Mario", "Marth": "Marth", "Mega Man": "Mega_Man",
+            "Meta Knight": "Meta_Knight", "Mewtwo": "Mewtwo", "Mii Brawler": "Mii_Brawler", "Mii Gunner": "Mii_Gunner",
+            "Mii Swordfighter": "Mii_Swordfighter", "Min Min": "Min_Min", "Mr. Game & Watch": "Mr_Game_&_Watch",
+            "Ness": "Ness", "Olimar": "Olimar", "Pac-Man": "Pac-Man", "Palutena": "Palutena", "Peach": "Peach",
+            "Pichu": "Pichu", "Pikachu": "Pikachu", "Piranha Plant": "Piranha_Plant", "Pit": "Pit",
+            "Pyra and Mythra": "Pyra_Mythra", "Richter": "Richter", "Ridley": "Ridley", "R.O.B.": "ROB",
+            "Robin": "Robin", "Rosalina & Luma": "Rosalina_&_Luma", "Roy": "Roy", "Ryu": "Ryu", "Samus": "Samus",
+            "Sephiroth": "Sephiroth", "Sheik": "Sheik", "Shulk": "Shulk", "Simon": "Simon", "Snake": "Snake",
+            "Sora": "Sora", "Sonic": "Sonic", "Steve": "Steve", "Terry": "Terry", "Toon Link": "Toon_Link",
+            "Villager": "Villager", "Wario": "Wario", "Wii Fit Trainer": "Wii_Fit_Trainer", "Wolf": "Wolf",
+            "Yoshi": "Yoshi", "Young Link": "Young_Link", "Zelda": "Zelda", "Zero Suit Samus": "Zero_Suit_Samus"
+        };
+        const stockIconBaseUrl = "https://www.ssbwiki.com/images/stock/ssbu/";
 
-        function updateField(id, value, defaultValue = '') {
-            const el = document.getElementById(id);
-            if (el) {
-                el.textContent = value || defaultValue;
-            }
-        }
+        // --- UI Update Function ---
+        const updateUI = (data) => {
+            document.getElementById('p1Sponsor').textContent = data.p1Sponsor || '';
+            document.getElementById('p1Tag').textContent = data.p1Tag || 'Player 1';
+            document.getElementById('p1Pronouns').textContent = data.p1Pronouns || '';
+            document.getElementById('p1Status').textContent = data.p1Status || 'Winners';
+            document.getElementById('p1Score').textContent = data.p1Score ?? 0;
 
-        function updateCharacterIcon(id, character) {
-             const el = document.getElementById(id);
-             if (el && character) {
-                 const formattedChar = character.replace(/\//g, '-').replace(/&/g, '%26');
-                 el.style.backgroundImage = `url('${stockIconUrlBase.replace('{CHARACTER}', formattedChar)}')`;
-             } else if (el) {
-                 el.style.backgroundImage = 'none';
-             }
-        }
-
-        // NEW function to dynamically shrink font size for long tags
-        function adjustPlayerTagSize(tagElementId, sponsorText, tagText) {
-            const tagElement = document.getElementById(tagElementId);
-            if (!tagElement) return;
-
-            const totalLength = (sponsorText || '').length + (tagText || '').length;
-            const baseSize = 2; // base font size in rem
-            let newSize = baseSize;
-
-            // More aggressive scaling for very long names
-            if (totalLength > 28) {
-                newSize = 1.2;
-            } else if (totalLength > 22) {
-                newSize = 1.5; 
-            } else if (totalLength > 16) {
-                newSize = 1.75;
-            }
+            document.getElementById('p2Sponsor').textContent = data.p2Sponsor || '';
+            document.getElementById('p2Tag').textContent = data.p2Tag || 'Player 2';
+            document.getElementById('p2Pronouns').textContent = data.p2Pronouns || '';
+            document.getElementById('p2Status').textContent = data.p2Status || 'Losers';
+            document.getElementById('p2Score').textContent = data.p2Score ?? 0;
             
-            tagElement.style.fontSize = `${newSize}rem`;
-        }
+            const [formatType, formatNumber] = (data.format || 'Best of 5').split(' ');
+            document.getElementById('round').textContent = data.round || 'Grand Finals';
+            document.getElementById('format').textContent = `${formatType} ${formatNumber}`;
 
+            // Update character icons
+            const p1CharFile = characters[data.p1Character];
+            if (p1CharFile) {
+                document.getElementById('p1Character').src = `${stockIconBaseUrl}${p1CharFile}.png`;
+            }
+            const p2CharFile = characters[data.p2Character];
+            if (p2CharFile) {
+                document.getElementById('p2Character').src = `${stockIconBaseUrl}${p2CharFile}.png`;
+            }
 
-        async function main() {
-            const app = initializeApp(firebaseConfig);
-            const db = getFirestore(app);
-            const auth = getAuth(app);
-            const appId = 'stillwater-smash-overlay';
+            // Adjust font size for long names
+            adjustFontSize('p1-name-container');
+            adjustFontSize('p2-name-container');
+        };
 
-            onAuthStateChanged(auth, user => {
-                if (user) {
-                    const docRef = doc(db, "overlays", appId);
-                    onSnapshot(docRef, (doc) => {
-                        if (doc.exists()) {
-                            const data = doc.data();
-                            
-                            // Player 1
-                            updateField('p1-sponsor-display', data.p1Sponsor);
-                            updateField('p1-tag-display', data.p1Tag, 'Player 1');
-                            updateField('p1-pronouns-display', data.p1Pronouns);
-                            updateField('p1-status', data.p1Status);
-                            updateField('p1-score', data.p1Score);
-                            updateCharacterIcon('p1-char-icon', data.p1Character);
-                            adjustPlayerTagSize('p1-tag', data.p1Sponsor, data.p1Tag); // Adjust font size
+        const adjustFontSize = (containerId) => {
+            const container = document.getElementById(containerId);
+            const sponsor = container.querySelector('span:first-child');
+            const tag = container.querySelector('span:last-child');
+            
+            const totalWidth = sponsor.offsetWidth + tag.offsetWidth;
+            const maxWidth = 420; // Max width of the name area in pixels
 
-                            // Player 2
-                            updateField('p2-sponsor-display', data.p2Sponsor);
-                            updateField('p2-tag-display', data.p2Tag, 'Player 2');
-                            updateField('p2-pronouns-display', data.p2Pronouns);
-                            updateField('p2-status', data.p2Status);
-                            updateField('p2-score', data.p2Score);
-                            updateCharacterIcon('p2-char-icon', data.p2Character);
-                            adjustPlayerTagSize('p2-tag', data.p2Sponsor, data.p2Tag); // Adjust font size
+            if (totalWidth > maxWidth) {
+                 const scale = maxWidth / totalWidth;
+                 const newTagSize = Math.max(1.5, 2.2 * scale); // Don't let it get smaller than 1.5rem
+                 const newSponsorSize = Math.max(0.9, 1.2 * scale);
+                 tag.style.fontSize = `${newTagSize}rem`;
+                 sponsor.style.fontSize = `${newSponsorSize}rem`;
+            } else {
+                 tag.style.fontSize = '2.2rem';
+                 sponsor.style.fontSize = '1.2rem';
+            }
+        };
 
-                            // Match Info
-                            updateField('round-display', data.round);
-                            const formatText = `${data.formatType || ''} ${data.formatNumber || ''}`.trim();
-                            updateField('format-display', formatText);
+        // --- Main Connection Logic ---
+        const main = async () => {
+            try {
+                const app = initializeApp(firebaseConfig);
+                const db = getFirestore(app);
+                const auth = getAuth(app);
+                
+                await signInAnonymously(auth);
 
-                        } else {
-                            console.log("No such document!");
-                        }
-                    });
-                } else {
-                     signInAnonymously(auth).catch(error => {
-                         console.error("Anonymous sign-in failed:", error);
-                     });
-                }
-            });
-        }
+                const appId = 'stillwater-smash-overlay'; 
+                const docRef = doc(db, 'overlays', appId);
+
+                onSnapshot(docRef, (doc) => {
+                    if (doc.exists()) {
+                        updateUI(doc.data());
+                    } else {
+                        // If no data exists, show default state
+                        updateUI({});
+                        console.log("No data found in Firestore, showing default overlay.");
+                    }
+                });
+            } catch (error) {
+                console.error("OVERLAY FAILED TO CONNECT:", error);
+                // You can add a visual indicator on the overlay for a failed connection if you want
+            }
+        };
+
         main();
+
     </script>
 </body>
 </html>
