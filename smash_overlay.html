@@ -55,8 +55,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* Using the direct raw content URL to ensure it loads */
-            background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/shieldpokeslogo.png');
+            /* Corrected URL as per your instruction */
+            background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/shieldpokeslogo.png');
             background-size: 115%; 
             background-position: center;
             background-repeat: no-repeat;
@@ -172,10 +172,11 @@
             const p2CharFile = characters[data.p2Character];
             document.getElementById('p2Character').src = p2CharFile ? `${stockIconBaseUrl}${p2CharFile}.png` : 'https://placehold.co/80x80/232323/232323?text=';
 
-            setTimeout(() => {
+            // Use requestAnimationFrame for smoother updates after DOM changes
+            requestAnimationFrame(() => {
                 adjustFontSize('p1-name-container');
                 adjustFontSize('p2-name-container');
-            }, 100);
+            });
         };
 
         const adjustFontSize = (containerId) => {
@@ -187,16 +188,19 @@
             tag.style.fontSize = '2.2rem';
             sponsor.style.fontSize = '1.2rem';
 
-            const totalWidth = sponsor.offsetWidth + tag.offsetWidth;
-            const maxWidth = 420;
+            // Allow the browser a moment to apply the reset styles before measuring
+            requestAnimationFrame(() => {
+                const totalWidth = sponsor.offsetWidth + tag.offsetWidth;
+                const maxWidth = 420; // Max width of the name area
 
-            if (totalWidth > maxWidth * 1.05) { // Added 5% buffer
-                 const scale = maxWidth / totalWidth;
-                 const newTagSize = Math.max(1.4, 2.2 * scale);
-                 const newSponsorSize = Math.max(0.8, 1.2 * scale);
-                 tag.style.fontSize = `${newTagSize}rem`;
-                 sponsor.style.fontSize = `${newSponsorSize}rem`;
-            }
+                if (totalWidth > maxWidth) {
+                    const scale = maxWidth / totalWidth;
+                    const newTagSize = Math.max(1.4, 2.2 * scale); // Don't let text get too small
+                    const newSponsorSize = Math.max(0.8, 1.2 * scale);
+                    tag.style.fontSize = `${newTagSize}rem`;
+                    sponsor.style.fontSize = `${newSponsorSize}rem`;
+                }
+            });
         };
 
         const main = async () => {
