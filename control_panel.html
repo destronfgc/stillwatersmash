@@ -20,7 +20,7 @@
         .btn-primary { 
             background-color: #FF7300; /* OSU Orange */
             color: #ffffff;
-            transition: background-color 0.2s;
+            transition: background-color: 0.2s;
         }
         .btn-primary:hover {
             background-color: #d96200;
@@ -28,7 +28,7 @@
         .btn-secondary { 
             background-color: #808080; /* OSU Gray */
             color: #ffffff;
-            transition: background-color 0.2s;
+            transition: background-color: 0.2s;
         }
         .btn-secondary:hover {
             background-color: #6a6a6a;
@@ -92,45 +92,26 @@
                 </div>
             </div>
 
-            <!-- Match & Start.gg Info -->
-            <div class="space-y-6">
-                <div class="card p-6 rounded-lg shadow-lg space-y-4">
-                    <h2 class="text-2xl text-white">Match Info</h2>
-                    <div>
-                        <label for="round" class="block text-sm font-medium text-gray-300">Round</label>
-                        <input type="text" id="round" class="mt-1 block w-full rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                         <label for="formatType" class="block text-sm font-medium text-gray-300">Format</label>
-                        <div class="flex items-center space-x-2 mt-1">
-                            <select id="formatType" class="block w-1/2 rounded-md shadow-sm p-2">
-                                <option>Best of</option>
-                                <option>First to</option>
-                            </select>
-                            <input type="number" id="formatNumber" placeholder="e.g., 5" class="block w-1/2 rounded-md shadow-sm p-2">
-                        </div>
-                    </div>
-                    <div class="flex flex-col space-y-3 pt-2">
-                        <button id="swapPlayers" class="btn-secondary w-full p-3 rounded-md font-bold text-lg">Swap Players</button>
-                        <button id="forceUpdate" class="btn-primary w-full p-3 rounded-md font-bold text-lg">Force Update</button>
+            <!-- Match Info -->
+            <div class="card p-6 rounded-lg shadow-lg space-y-4">
+                <h2 class="text-2xl text-white">Match Info</h2>
+                <div>
+                    <label for="round" class="block text-sm font-medium text-gray-300">Round</label>
+                    <input type="text" id="round" class="mt-1 block w-full rounded-md shadow-sm p-2">
+                </div>
+                <div>
+                     <label for="formatType" class="block text-sm font-medium text-gray-300">Format</label>
+                    <div class="flex items-center space-x-2 mt-1">
+                        <select id="formatType" class="block w-1/2 rounded-md shadow-sm p-2">
+                            <option>Best of</option>
+                            <option>First to</option>
+                        </select>
+                        <input type="number" id="formatNumber" placeholder="e.g., 5" class="block w-1/2 rounded-md shadow-sm p-2">
                     </div>
                 </div>
-                <div class="card p-6 rounded-lg shadow-lg space-y-4">
-                    <h2 class="text-2xl text-white">Start.gg Integration</h2>
-                    <div id="startgg-status" class="text-sm text-gray-400">Enter your API Key and tournament info to fetch match data.</div>
-                    <div>
-                        <label for="apiKey" class="block text-sm font-medium text-gray-300">start.gg API Key</label>
-                        <input type="password" id="apiKey" class="mt-1 block w-full rounded-md shadow-sm p-2" placeholder="Paste your key here...">
-                    </div>
-                    <div>
-                        <label for="tournamentUrl" class="block text-sm font-medium text-gray-300">Tournament URL</label>
-                        <input type="url" id="tournamentUrl" class="mt-1 block w-full rounded-md shadow-sm p-2" placeholder="https://start.gg/tournament/your-event">
-                    </div>
-                     <div>
-                        <label for="streamName" class="block text-sm font-medium text-gray-300">Stream Name / Station</label>
-                        <input type="text" id="streamName" class="mt-1 block w-full rounded-md shadow-sm p-2" placeholder="e.g., TNS_1 or MainStage">
-                    </div>
-                    <button id="fetch-match" class="btn-primary w-full p-3 rounded-md font-bold text-lg">Fetch Current Match</button>
+                <div class="flex flex-col space-y-3 pt-2">
+                    <button id="swapPlayers" class="btn-secondary w-full p-3 rounded-md font-bold text-lg">Swap Players</button>
+                    <button id="forceUpdate" class="btn-primary w-full p-3 rounded-md font-bold text-lg">Force Update</button>
                 </div>
             </div>
 
@@ -169,16 +150,7 @@
         </div>
     </div>
 
-    <script type="module">
-        // --- Firebase Setup ---
-        // This setup remains the same and does not need to be changed.
-        // It connects this control panel to the same database as your overlay.
-    </script>
-
     <script type="module" id="control-script">
-        // We are keeping the Firebase and character data setup from the previous versions.
-        // The main changes are in how we interact with the start.gg API.
-
         // --- Character Data ---
         const characters = {
             "Banjo & Kazooie": "Banjo_&_Kazooie", "Bayonetta": "Bayonetta", "Bowser": "Bowser", "Bowser Jr.": "Bowser_Jr",
@@ -214,15 +186,11 @@
             p2Character.appendChild(option2);
         });
 
-        // --- Main App Logic (with Firebase) ---
-        // This part is condensed but works the same way as before.
-        // It connects to your Firebase and handles saving/loading data.
+        // --- Firebase Logic ---
         let db, auth, docRef;
 
-        const connectToFirebase = async () => {
+        const main = async () => {
             try {
-                // This part connects to your database using the config file.
-                // Ensure `firebase-config.js` is in the same folder.
                 const { firebaseConfig } = await import('./firebase-config.js');
                 const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
                 const { getFirestore, doc, setDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
@@ -231,22 +199,27 @@
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
+                
                 await signInAnonymously(auth);
                 
                 const appId = 'stillwater-smash-overlay'; 
                 docRef = doc(db, 'overlays', appId);
 
                 onSnapshot(docRef, (doc) => {
+                    // This function will run when the page loads and whenever data changes in the database.
                     if (doc.exists()) {
-                        const data = doc.data();
-                        // Load data into fields if it exists
-                        // ...
+                       // We can add logic here to load data if needed, but for now we just confirm connection.
                     }
                     updateStatus(true, 'Connected & Synced');
+                }, (error) => {
+                    console.error("Snapshot error:", error);
+                    updateStatus(false, 'Sync Failed');
                 });
+
             } catch (error) {
                 console.error("Firebase connection error:", error);
-                updateStatus(false, 'DB Connection Failed');
+                updateStatus(false, `DB Connection Failed: ${error.message}`);
+                // The full error message will now be displayed, which is very helpful for debugging.
             }
         };
 
@@ -259,7 +232,11 @@
         };
 
         const saveData = () => {
-            if (!docRef) return;
+            if (!docRef) {
+                 console.error("Database reference not initialized. Cannot save data.");
+                 updateStatus(false, 'Not Connected');
+                 return;
+            }
             const data = {
                 p1Sponsor: document.getElementById('p1Sponsor').value,
                 p1Tag: document.getElementById('p1Tag').value,
@@ -278,18 +255,19 @@
             };
             setDoc(docRef, data, { merge: true }).then(() => {
                 updateStatus(true, 'Saved');
-            }).catch(e => updateStatus(false, 'Save Failed'));
+            }).catch(e => {
+                console.error("Save error:", e);
+                updateStatus(false, 'Save Failed');
+            });
         };
         
-        // --- Event Listeners for UI ---
+        // --- Event Listeners ---
         document.getElementById('forceUpdate').addEventListener('click', saveData);
         document.querySelectorAll('input, select').forEach(el => el.addEventListener('change', saveData));
-        // Score buttons
         document.getElementById('p1ScoreUp').addEventListener('click', () => { document.getElementById('p1Score').value++; saveData(); });
         document.getElementById('p1ScoreDown').addEventListener('click', () => { document.getElementById('p1Score').value--; saveData(); });
         document.getElementById('p2ScoreUp').addEventListener('click', () => { document.getElementById('p2Score').value++; saveData(); });
         document.getElementById('p2ScoreDown').addEventListener('click', () => { document.getElementById('p2Score').value--; saveData(); });
-        // Swap players
         document.getElementById('swapPlayers').addEventListener('click', () => {
             const p1Fields = ['p1Sponsor', 'p1Tag', 'p1Pronouns', 'p1Status', 'p1Score', 'p1Character'];
             const p2Fields = ['p2Sponsor', 'p2Tag', 'p2Pronouns', 'p2Status', 'p2Score', 'p2Character'];
@@ -300,148 +278,9 @@
             });
             saveData();
         });
-
-
-        // --- NEW: Start.gg Integration Logic ---
-
-        const apiKeyInput = document.getElementById('apiKey');
-        const startggStatus = document.getElementById('startgg-status');
-        
-        // Load API key from browser's local storage if it exists
-        apiKeyInput.value = localStorage.getItem('startggApiKey') || '';
-        apiKeyInput.addEventListener('change', () => {
-            localStorage.setItem('startggApiKey', apiKeyInput.value);
-            startggStatus.textContent = 'API Key saved locally.';
-            startggStatus.style.color = '#68d391'; // green
-        });
-        
-        const fetchMatchButton = document.getElementById('fetch-match');
-        fetchMatchButton.addEventListener('click', async () => {
-            const key = apiKeyInput.value;
-            const tournamentUrl = document.getElementById('tournamentUrl').value;
-            const streamName = document.getElementById('streamName').value;
-
-            if (!key) {
-                startggStatus.textContent = 'Error: API Key is missing.';
-                startggStatus.style.color = '#f56565'; // red
-                return;
-            }
-            if (!tournamentUrl || !streamName) {
-                startggStatus.textContent = 'Error: Tournament URL or Stream Name is missing.';
-                startggStatus.style.color = '#f56565'; // red
-                return;
-            }
-
-            // --- 1. Extract tournament slug from URL ---
-            let tournamentSlug = '';
-            try {
-                const url = new URL(tournamentUrl);
-                const pathParts = url.pathname.split('/');
-                if (pathParts.length >= 3 && pathParts[1] === 'tournament') {
-                    tournamentSlug = pathParts[2];
-                } else {
-                    throw new Error();
-                }
-            } catch (e) {
-                 startggStatus.textContent = 'Error: Invalid tournament URL format.';
-                 startggStatus.style.color = '#f56565'; // red
-                 return;
-            }
-
-            startggStatus.textContent = 'Fetching data from start.gg...';
-            startggStatus.style.color = '#f6e05e'; // yellow
-
-            // --- 2. Construct GraphQL query and make API call ---
-            const query = `
-                query StreamQueue($slug: String!) {
-                    tournament(slug: $slug) {
-                        streamQueue {
-                            stream {
-                                streamName
-                            }
-                            sets {
-                                id
-                                fullRoundText
-                                state
-                                slots {
-                                    entrant {
-                                        name
-                                        participants {
-                                            pronoun
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }`;
-
-            try {
-                const response = await fetch('https://api.start.gg/gql/alpha', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${key}`
-                    },
-                    body: JSON.stringify({
-                        query,
-                        variables: { slug: tournamentSlug }
-                    })
-                });
-
-                const { data, errors } = await response.json();
-
-                if (errors) {
-                    throw new Error(errors[0].message);
-                }
-                
-                // --- 3. Find the correct stream and the first queued match ---
-                const streamQueue = data.tournament.streamQueue.find(q => q.stream.streamName.toLowerCase() === streamName.toLowerCase());
-                
-                if (!streamQueue) {
-                    throw new Error(`Stream station "${streamName}" not found.`);
-                }
-                
-                const currentMatch = streamQueue.sets.find(s => s.state === 1); // State 1 is "Ready" or "Queued"
-
-                if (!currentMatch) {
-                     throw new Error('No match is currently queued for this stream.');
-                }
-                
-                // --- 4. Populate the fields with the fetched data ---
-                const [slot1, slot2] = currentMatch.slots;
-                const p1Name = slot1.entrant.name;
-                const p2Name = slot2.entrant.name;
-                
-                // Split name into Sponsor | Tag
-                const [p1Sponsor, p1Tag] = p1Name.includes('|') ? p1Name.split('|').map(s => s.trim()) : ['', p1Name];
-                const [p2Sponsor, p2Tag] = p2Name.includes('|') ? p2Name.split('|').map(s => s.trim()) : ['', p2Name];
-
-                document.getElementById('p1Sponsor').value = p1Sponsor;
-                document.getElementById('p1Tag').value = p1Tag;
-                document.getElementById('p1Pronouns').value = slot1.entrant.participants[0]?.pronoun || '';
-                
-                document.getElementById('p2Sponsor').value = p2Sponsor;
-                document.getElementById('p2Tag').value = p2Tag;
-                document.getElementById('p2Pronouns').value = slot2.entrant.participants[0]?.pronoun || '';
-
-                document.getElementById('round').value = currentMatch.fullRoundText;
-                
-                startggStatus.textContent = 'Match data fetched successfully!';
-                startggStatus.style.color = '#68d391'; // green
-
-                // Save the newly populated data to Firebase
-                saveData();
-
-            } catch (error) {
-                console.error('start.gg API error:', error);
-                startggStatus.textContent = `Error: ${error.message}`;
-                startggStatus.style.color = '#f56565'; // red
-            }
-        });
         
         // --- Initial Load ---
-        connectToFirebase();
+        main();
     </script>
 </body>
 </html>
