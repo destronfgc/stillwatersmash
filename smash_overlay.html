@@ -34,7 +34,13 @@
             font-weight: 700;
             width: 80px;
             height: 80px;
+        }
+        /* Mirrored clip-paths for symmetry */
+        .p1-score-box {
             clip-path: polygon(0 0, 100% 0, 100% 100%, 25% 100%, 0 75%);
+        }
+        .p2-score-box {
+            clip-path: polygon(0 0, 100% 0, 100% 75%, 75% 100%, 0 100%);
         }
         .p1-bar { background-color: #FF7300; /* OSU Orange */ }
         .p2-bar { background-color: #232323; /* OSU Black */ border: 2px solid #555; }
@@ -48,9 +54,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* Logo as background */
-            background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/shieldpokeslogo.png');
-            background-size: 115%; /* Zoom in to hide transparent edges */
+            /* Added a version number to the URL to force a fresh download */
+            background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/shieldpokeslogo.png?v=2');
+            background-size: 115%; 
             background-position: center;
             background-repeat: no-repeat;
         }
@@ -66,12 +72,12 @@
 </head>
 <body class="flex items-start justify-center pt-8">
 
-    <!-- Main Overlay Container -->
-    <div class="w-[1200px] h-[120px] flex items-center justify-center relative">
+    <!-- Main Overlay Container - now using justify-between for symmetry -->
+    <div class="w-[1200px] h-[120px] flex items-center justify-between relative">
         
-        <!-- Player 1 -->
+        <!-- Player 1 Group -->
         <div class="h-full flex items-center">
-            <div class="score-box flex flex-col items-center justify-center">
+            <div class="score-box p1-score-box flex flex-col items-center justify-center">
                 <span id="p1Score" class="text-4xl leading-none">0</span>
                 <span id="p1Status" class="secondary-text text-black text-xs -mt-1">Winners</span>
             </div>
@@ -86,16 +92,8 @@
                 <img id="p1Character" src="https://placehold.co/80x80/FF7300/FF7300" class="h-[70px] w-auto ml-3">
             </div>
         </div>
-
-        <!-- Centerpiece -->
-        <div class="absolute bottom-[-15px] z-10 flex flex-col items-center">
-             <div class="center-logo"></div>
-             <div class="match-info-box px-4 py-1 rounded-md text-center -mt-2">
-                 <span id="round">Grand Finals</span> | <span id="format">Best of 5</span>
-             </div>
-        </div>
-
-        <!-- Player 2 -->
+        
+        <!-- Player 2 Group -->
         <div class="h-full flex items-center">
              <div class="p2-bar h-[70px] flex items-center justify-start pl-4" style="width: 450px;">
                  <img id="p2Character" src="https://placehold.co/80x80/232323/232323" class="h-[70px] w-auto mr-3">
@@ -107,21 +105,28 @@
                     <span id="p2Pronouns" class="secondary-text text-gray-400 text-sm"></span>
                 </div>
             </div>
-            <div class="score-box flex flex-col items-center justify-center">
+            <div class="score-box p2-score-box flex flex-col items-center justify-center">
                 <span id="p2Score" class="text-4xl leading-none">0</span>
                 <span id="p2Status" class="secondary-text text-black text-xs -mt-1">Losers</span>
             </div>
         </div>
+
+        <!-- Centerpiece - Pushed down to prevent clipping -->
+        <div class="absolute left-1/2 -translate-x-1/2 bottom-[-25px] z-10 flex flex-col items-center">
+             <div class="center-logo"></div>
+             <div class="match-info-box px-4 py-1 rounded-md text-center -mt-2">
+                 <span id="round">Grand Finals</span> | <span id="format">Best of 5</span>
+             </div>
+        </div>
     </div>
 
     <script type="module">
-        // --- Firebase Logic ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // Ensure this points to your corrected config file
         import { firebaseConfig } from './firebase-config.js';
 
-        // --- Character Data (for image URLs) ---
         const characters = {
             "Banjo & Kazooie": "Banjo_&_Kazooie", "Bayonetta": "Bayonetta", "Bowser": "Bowser", "Bowser Jr.": "Bowser_Jr",
             "Byleth": "Byleth", "Captain Falcon": "Captain_Falcon", "Chrom": "Chrom", "Cloud": "Cloud", "Corrin": "Corrin",
@@ -145,7 +150,6 @@
         };
         const stockIconBaseUrl = "https://www.ssbwiki.com/images/stock/ssbu/";
 
-        // --- UI Update Function ---
         const updateUI = (data) => {
             document.getElementById('p1Sponsor').textContent = data.p1Sponsor || '';
             document.getElementById('p1Tag').textContent = data.p1Tag || 'Player 1';
@@ -159,23 +163,20 @@
             document.getElementById('p2Status').textContent = data.p2Status || 'Losers';
             document.getElementById('p2Score').textContent = data.p2Score ?? 0;
             
-            const [formatType, formatNumber] = (data.format || 'Best of 5').split(' ');
             document.getElementById('round').textContent = data.round || 'Grand Finals';
-            document.getElementById('format').textContent = `${formatType} ${formatNumber}`;
+            document.getElementById('format').textContent = data.format || 'Best of 5';
 
-            // Update character icons
             const p1CharFile = characters[data.p1Character];
-            if (p1CharFile) {
-                document.getElementById('p1Character').src = `${stockIconBaseUrl}${p1CharFile}.png`;
-            }
+            if (p1CharFile) document.getElementById('p1Character').src = `${stockIconBaseUrl}${p1CharFile}.png`;
+            
             const p2CharFile = characters[data.p2Character];
-            if (p2CharFile) {
-                document.getElementById('p2Character').src = `${stockIconBaseUrl}${p2CharFile}.png`;
-            }
+            if (p2CharFile) document.getElementById('p2Character').src = `${stockIconBaseUrl}${p2CharFile}.png`;
 
-            // Adjust font size for long names
-            adjustFontSize('p1-name-container');
-            adjustFontSize('p2-name-container');
+            // Adjust font size after a short delay to allow rendering
+            setTimeout(() => {
+                adjustFontSize('p1-name-container');
+                adjustFontSize('p2-name-container');
+            }, 100);
         };
 
         const adjustFontSize = (containerId) => {
@@ -183,50 +184,41 @@
             const sponsor = container.querySelector('span:first-child');
             const tag = container.querySelector('span:last-child');
             
+            // Reset styles first
+            tag.style.fontSize = '2.2rem';
+            sponsor.style.fontSize = '1.2rem';
+
             const totalWidth = sponsor.offsetWidth + tag.offsetWidth;
-            const maxWidth = 420; // Max width of the name area in pixels
+            const maxWidth = 420;
 
             if (totalWidth > maxWidth) {
                  const scale = maxWidth / totalWidth;
-                 const newTagSize = Math.max(1.5, 2.2 * scale); // Don't let it get smaller than 1.5rem
+                 const newTagSize = Math.max(1.5, 2.2 * scale);
                  const newSponsorSize = Math.max(0.9, 1.2 * scale);
                  tag.style.fontSize = `${newTagSize}rem`;
                  sponsor.style.fontSize = `${newSponsorSize}rem`;
-            } else {
-                 tag.style.fontSize = '2.2rem';
-                 sponsor.style.fontSize = '1.2rem';
             }
         };
 
-        // --- Main Connection Logic ---
         const main = async () => {
             try {
                 const app = initializeApp(firebaseConfig);
                 const db = getFirestore(app);
                 const auth = getAuth(app);
-                
                 await signInAnonymously(auth);
 
                 const appId = 'stillwater-smash-overlay'; 
                 const docRef = doc(db, 'overlays', appId);
 
                 onSnapshot(docRef, (doc) => {
-                    if (doc.exists()) {
-                        updateUI(doc.data());
-                    } else {
-                        // If no data exists, show default state
-                        updateUI({});
-                        console.log("No data found in Firestore, showing default overlay.");
-                    }
+                    updateUI(doc.exists() ? doc.data() : {});
                 });
             } catch (error) {
                 console.error("OVERLAY FAILED TO CONNECT:", error);
-                // You can add a visual indicator on the overlay for a failed connection if you want
             }
         };
 
         main();
-
     </script>
 </body>
 </html>
