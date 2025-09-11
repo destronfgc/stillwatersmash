@@ -19,16 +19,19 @@
             font-family: 'Oswald', sans-serif;
             text-transform: uppercase;
             font-weight: 700;
+            font-size: 2.2rem;
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
-            transition: font-size 0.2s ease-in-out;
         }
         .secondary-text {
             font-family: 'Roboto Slab', serif;
             text-transform: uppercase;
-            font-size: 0.9rem;
+            font-size: 1.2rem; /* Increased size for visibility */
             letter-spacing: 0.05em;
-            transition: font-size 0.2s ease-in-out;
         }
+        /* Increased brightness for better contrast/visibility */
+        .p1-bar .secondary-text { color: #E5E7EB; } /* Brighter white for orange bg */
+        .p2-bar .secondary-text { color: #D1D5DB; } /* Brighter gray for black bg */
+        
         .score-box {
             background-color: white;
             color: #FF7300; /* OSU Orange */
@@ -52,10 +55,6 @@
             background-color: white;
             border-radius: 50%;
             border: 8px solid #FF7300; /* OSU Orange */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* Corrected URL as per your instruction */
             background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/shieldpokeslogo.png');
             background-size: 115%; 
             background-position: center;
@@ -69,41 +68,45 @@
             font-weight: 700;
             text-transform: uppercase;
         }
+        /* New styles for the dynamic text scaling */
+        .name-container {
+            transition: transform 0.2s ease-out;
+        }
+        #p1-name-container { transform-origin: right; }
+        #p2-name-container { transform-origin: left; }
     </style>
 </head>
 <body class="flex items-start justify-center pt-8">
 
-    <!-- Main Overlay Container - now using justify-between for symmetry -->
     <div class="w-[1200px] h-[120px] flex items-center justify-between relative">
         
-        <!-- Player 1 Group -->
         <div class="h-full flex items-center">
             <div class="score-box p1-score-box flex flex-col items-center justify-center">
                 <span id="p1Score" class="text-4xl leading-none">0</span>
                 <span id="p1Status" class="secondary-text text-black text-xs -mt-1">Winners</span>
             </div>
             <div class="p1-bar h-[70px] flex items-center justify-end pr-4" style="width: 450px;">
-                <div class="flex flex-col items-end text-right overflow-hidden">
-                    <div id="p1-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
-                        <span id="p1Sponsor" class="secondary-text text-gray-200" style="font-size: 1.2rem;"></span>
-                        <span id="p1Tag" class="player-tag-text" style="font-size: 2.2rem;">Player 1</span>
+                <!-- This container now has a fixed width to check against -->
+                <div class="flex flex-col items-end text-right overflow-hidden w-[350px]">
+                    <div id="p1-name-container" class="name-container flex items-baseline gap-3 whitespace-nowrap self-end">
+                        <span id="p1Sponsor" class="secondary-text"></span>
+                        <span id="p1Tag" class="player-tag-text">Player 1</span>
                     </div>
-                    <span id="p1Pronouns" class="secondary-text text-gray-200 text-sm"></span>
+                    <span id="p1Pronouns" class="secondary-text text-sm"></span>
                 </div>
                 <img id="p1Character" src="https://placehold.co/80x80/FF7300/FF7300?text=" class="h-[70px] w-auto ml-3">
             </div>
         </div>
         
-        <!-- Player 2 Group -->
         <div class="h-full flex items-center">
              <div class="p2-bar h-[70px] flex items-center justify-start pl-4" style="width: 450px;">
                  <img id="p2Character" src="https://placehold.co/80x80/232323/232323?text=" class="h-[70px] w-auto mr-3">
-                 <div class="flex flex-col items-start text-left overflow-hidden">
-                    <div id="p2-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
-                        <span id="p2Sponsor" class="secondary-text text-gray-400" style="font-size: 1.2rem;"></span>
-                        <span id="p2Tag" class="player-tag-text" style="font-size: 2.2rem;">Player 2</span>
+                 <div class="flex flex-col items-start text-left overflow-hidden w-[350px]">
+                    <div id="p2-name-container" class="name-container flex items-baseline gap-3 whitespace-nowrap self-start">
+                        <span id="p2Sponsor" class="secondary-text"></span>
+                        <span id="p2Tag" class="player-tag-text">Player 2</span>
                     </div>
-                    <span id="p2Pronouns" class="secondary-text text-gray-400 text-sm"></span>
+                    <span id="p2Pronouns" class="secondary-text text-sm"></span>
                 </div>
             </div>
             <div class="score-box p2-score-box flex flex-col items-center justify-center">
@@ -112,7 +115,6 @@
             </div>
         </div>
 
-        <!-- Centerpiece - Pushed down to prevent clipping -->
         <div class="absolute left-1/2 -translate-x-1/2 bottom-[-25px] z-10 flex flex-col items-center">
              <div class="center-logo"></div>
              <div class="match-info-box px-4 py-1 rounded-md text-center -mt-2">
@@ -172,33 +174,27 @@
             const p2CharFile = characters[data.p2Character];
             document.getElementById('p2Character').src = p2CharFile ? `${stockIconBaseUrl}${p2CharFile}.png` : 'https://placehold.co/80x80/232323/232323?text=';
 
-            // Use requestAnimationFrame for smoother updates after DOM changes
             requestAnimationFrame(() => {
-                adjustFontSize('p1-name-container');
-                adjustFontSize('p2-name-container');
+                adjustTextScaling('p1-name-container');
+                adjustTextScaling('p2-name-container');
             });
         };
 
-        const adjustFontSize = (containerId) => {
+        // NEW, more reliable text scaling function
+        const adjustTextScaling = (containerId) => {
             const container = document.getElementById(containerId);
-            const sponsor = container.querySelector('span:first-child');
-            const tag = container.querySelector('span:last-child');
+            // Reset transform to get an accurate measurement of the true overflow
+            container.style.transform = 'scaleX(1)';
             
-            // Reset styles first to get accurate measurement
-            tag.style.fontSize = '2.2rem';
-            sponsor.style.fontSize = '1.2rem';
-
-            // Allow the browser a moment to apply the reset styles before measuring
             requestAnimationFrame(() => {
-                const totalWidth = sponsor.offsetWidth + tag.offsetWidth;
-                const maxWidth = 420; // Max width of the name area
-
-                if (totalWidth > maxWidth) {
-                    const scale = maxWidth / totalWidth;
-                    const newTagSize = Math.max(1.4, 2.2 * scale); // Don't let text get too small
-                    const newSponsorSize = Math.max(0.8, 1.2 * scale);
-                    tag.style.fontSize = `${newTagSize}rem`;
-                    sponsor.style.fontSize = `${newSponsorSize}rem`;
+                const containerWidth = container.parentElement.clientWidth; // Get width of the fixed parent
+                const contentWidth = container.scrollWidth; // Get the actual width of the text content
+                
+                if (contentWidth > containerWidth) {
+                    const scale = containerWidth / contentWidth;
+                    container.style.transform = `scaleX(${scale})`;
+                } else {
+                    container.style.transform = 'scaleX(1)';
                 }
             });
         };
