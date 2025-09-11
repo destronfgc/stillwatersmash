@@ -1,9 +1,5 @@
-// This configuration is specific to your Firebase project.
-// It allows your overlay and control panel to connect to the correct database.
-
-const firebaseConfig = {
-  // PASTE YOUR NEW KEY ON THE LINE BELOW
-  apiKey: "AIzaSyBTeMGx5wg5ubD_8s3_1b7Ggn-Xn3PfhUI",
+export const firebaseConfig = {
+  apiKey: "AIzaSyBTeMGX5wgSubD_8S3_1b7Ggn-Xn3PfHUI",
   authDomain: "stillwater-overlay.firebaseapp.com",
   projectId: "stillwater-overlay",
   storageBucket: "stillwater-overlay.firebasestorage.app",
