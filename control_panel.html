@@ -3,283 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smash Overlay Control Panel</title>
+    <title>Overlay Control Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* OSU Theme */
-        body { 
+        body {
             background-color: #232323; /* OSU Black */
-            color: #ffffff; 
-            font-family: 'Roboto Slab', serif; 
+            font-family: 'Roboto Slab', serif;
+            color: #EAEAEA;
         }
-        .card { 
-            background-color: #3d3d3d; /* Darker Gray */
-            border: 1px solid #555555;
+        .card {
+            background-color: #2D2D2D;
+            border-radius: 0.75rem;
+            border: 1px solid #444;
+            padding: 1.5rem;
         }
-        .btn-primary { 
+        .input-field {
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            width: 100%;
+            color: #EAEAEA;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-primary {
             background-color: #FF7300; /* OSU Orange */
-            color: #ffffff;
-            transition: background-color: 0.2s;
+            color: white;
+            border: 2px solid #FF7300;
         }
-        .btn-primary:hover {
-            background-color: #d96200;
+        .btn-primary:hover { background-color: #D96400; }
+        .btn-secondary {
+            background-color: #555;
+            color: #EAEAEA;
+            border: 2px solid #777;
         }
-        .btn-secondary { 
-            background-color: #808080; /* OSU Gray */
-            color: #ffffff;
-            transition: background-color: 0.2s;
+        .btn-secondary:hover { background-color: #666; }
+
+        .score-btn {
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .btn-secondary:hover {
-            background-color: #6a6a6a;
-        }
-        .btn-danger { background-color: #dc2626; }
-        .btn-success { background-color: #16a34a; }
-        input, select { 
-            background-color: #555555; 
-            border-color: #777777; 
-            color: #ffffff;
-        }
-        h1, h2 { font-family: 'Oswald', sans-serif; }
-        .p1-header { color: #FF7300; } /* OSU Orange for Player 1 */
-        .p2-header { color: #cccccc; } /* Light Gray for Player 2 */
+        .plus { background-color: #28a745; color: white; }
+        .minus { background-color: #dc3545; color: white; }
     </style>
 </head>
-<body class="p-4 md:p-8">
-
-    <div class="max-w-7xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-white">Overlay Control Panel</h1>
-            <div id="db-status" class="flex items-center space-x-2">
-                <span class="text-gray-400">Connecting...</span>
-                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-            </div>
-        </div>
-
-        <!-- Main Control Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            <!-- Player 1 -->
-            <div class="card p-6 rounded-lg shadow-lg space-y-4">
-                <h2 class="text-2xl p1-header">Player 1</h2>
-                <div>
-                    <label for="p1Sponsor" class="block text-sm font-medium text-gray-300">Sponsor</label>
-                    <input type="text" id="p1Sponsor" class="mt-1 block w-full rounded-md shadow-sm p-2">
-                </div>
-                <div>
-                    <label for="p1Tag" class="block text-sm font-medium text-gray-300">Tag</label>
-                    <input type="text" id="p1Tag" class="mt-1 block w-full rounded-md shadow-sm p-2">
-                </div>
-                <div>
-                    <label for="p1Pronouns" class="block text-sm font-medium text-gray-300">Pronouns</label>
-                    <input type="text" id="p1Pronouns" class="mt-1 block w-full rounded-md shadow-sm p-2">
-                </div>
-                <div>
-                    <label for="p1Status" class="block text-sm font-medium text-gray-300">Status (L/W)</label>
-                    <input type="text" id="p1Status" class="mt-1 block w-full rounded-md shadow-sm p-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-300">Score</label>
-                    <div class="flex items-center mt-1">
-                        <button id="p1ScoreDown" class="btn-danger p-2 rounded-l-md">-</button>
-                        <input type="number" id="p1Score" value="0" class="w-full text-center p-2">
-                        <button id="p1ScoreUp" class="btn-success p-2 rounded-r-md">+</button>
-                    </div>
-                </div>
-                <div>
-                    <label for="p1Character" class="block text-sm font-medium text-gray-300">Character</label>
-                    <select id="p1Character" class="mt-1 block w-full rounded-md shadow-sm p-2"></select>
-                </div>
-            </div>
-
-            <!-- Match Info -->
-            <div class="card p-6 rounded-lg shadow-lg space-y-4">
-                <h2 class="text-2xl text-white">Match Info</h2>
-                <div>
-                    <label for="round" class="block text-sm font-medium text-gray-300">Round</label>
-                    <input type="text" id="round" class="mt-1 block w-full rounded-md shadow-sm p-2">
-                </div>
-                <div>
-                     <label for="formatType" class="block text-sm font-medium text-gray-300">Format</label>
-                    <div class="flex items-center space-x-2 mt-1">
-                        <select id="formatType" class="block w-1/2 rounded-md shadow-sm p-2">
-                            <option>Best of</option>
-                            <option>First to</option>
-                        </select>
-                        <input type="number" id="formatNumber" placeholder="e.g., 5" class="block w-1/2 rounded-md shadow-sm p-2">
-                    </div>
-                </div>
-                <div class="flex flex-col space-y-3 pt-2">
-                    <button id="swapPlayers" class="btn-secondary w-full p-3 rounded-md font-bold text-lg">Swap Players</button>
-                    <button id="forceUpdate" class="btn-primary w-full p-3 rounded-md font-bold text-lg">Force Update</button>
-                </div>
-            </div>
-
-            <!-- Player 2 -->
-            <div class="card p-6 rounded-lg shadow-lg space-y-4">
-                <h2 class="text-2xl p2-header">Player 2</h2>
-                <div>
-                    <label for="p2Sponsor" class="block text-sm font-medium text-gray-300">Sponsor</label>
-                    <input type="text" id="p2Sponsor" class="mt-1 block w-full rounded-md shadow-sm p-2">
-                </div>
-                <div>
-                    <label for="p2Tag" class="block text-sm font-medium text-gray-300">Tag</label>
-                    <input type="text" id="p2Tag" class="mt-1 block w-full rounded-md shadow-sm p-2">
-                </div>
-                 <div>
-                    <label for="p2Pronouns" class="block text-sm font-medium text-gray-300">Pronouns</label>
-                    <input type="text" id="p2Pronouns" class="mt-1 block w-full rounded-md shadow-sm p-2">
-                </div>
-                <div>
-                    <label for="p2Status" class="block text-sm font-medium text-gray-300">Status (L/W)</label>
-                    <input type="text" id="p2Status" class="mt-1 block w-full rounded-md shadow-sm p-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-300">Score</label>
-                    <div class="flex items-center mt-1">
-                        <button id="p2ScoreDown" class="btn-danger p-2 rounded-l-md">-</button>
-                        <input type="number" id="p2Score" value="0" class="w-full text-center p-2">
-                        <button id="p2ScoreUp" class="btn-success p-2 rounded-r-md">+</button>
-                    </div>
-                </div>
-                <div>
-                    <label for="p2Character" class="block text-sm font-medium text-gray-300">Character</label>
-                    <select id="p2Character" class="mt-1 block w-full rounded-md shadow-sm p-2"></select>
-                </div>
-            </div>
+<body class="p-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold" style="font-family: 'Oswald', sans-serif;">Overlay Control Panel</h1>
+        <div id="status" class="flex items-center gap-2 px-3 py-1 bg-gray-700 rounded-full text-sm">
+            <span id="status-text">Connecting...</span>
+            <div id="status-dot" class="w-3 h-3 bg-yellow-500 rounded-full"></div>
         </div>
     </div>
 
-    <script type="module" id="control-script">
-        // --- Character Data ---
-        const characters = {
-            "Banjo & Kazooie": "Banjo_&_Kazooie", "Bayonetta": "Bayonetta", "Bowser": "Bowser", "Bowser Jr.": "Bowser_Jr",
-            "Byleth": "Byleth", "Captain Falcon": "Captain_Falcon", "Chrom": "Chrom", "Cloud": "Cloud", "Corrin": "Corrin",
-            "Daisy": "Daisy", "Dark Pit": "Dark_Pit", "Dark Samus": "Dark_Samus", "Diddy Kong": "Diddy_Kong",
-            "Donkey Kong": "Donkey_Kong", "Dr. Mario": "Dr_Mario", "Duck Hunt": "Duck_Hunt", "Falco": "Falco",
-            "Fox": "Fox", "Ganondorf": "Ganondorf", "Greninja": "Greninja", "Hero": "Hero", "Ice Climbers": "Ice_Climbers",
-            "Ike": "Ike", "Incineroar": "Incineroar", "Inkling": "Inkling", "Isabelle": "Isabelle", "Jigglypuff": "Jigglypuff",
-            "Joker": "Joker", "Kazuya": "Kazuya", "Ken": "Ken", "King Dedede": "King_Dedede", "King K. Rool": "King_K_Rool",
-            "Kirby": "Kirby", "Link": "Link", "Little Mac": "Little_Mac", "Lucario": "Lucario", "Lucas": "Lucas",
-            "Lucina": "Lucina", "Luigi": "Luigi", "Mario": "Mario", "Marth": "Marth", "Mega Man": "Mega_Man",
-            "Meta Knight": "Meta_Knight", "Mewtwo": "Mewtwo", "Mii Brawler": "Mii_Brawler", "Mii Gunner": "Mii_Gunner",
-            "Mii Swordfighter": "Mii_Swordfighter", "Min Min": "Min_Min", "Mr. Game & Watch": "Mr_Game_&_Watch",
-            "Ness": "Ness", "Olimar": "Olimar", "Pac-Man": "Pac-Man", "Palutena": "Palutena", "Peach": "Peach",
-            "Pichu": "Pichu", "Pikachu": "Pikachu", "Piranha Plant": "Piranha_Plant", "Pit": "Pit",
-            "Pyra and Mythra": "Pyra_Mythra", "Richter": "Richter", "Ridley": "Ridley", "R.O.B.": "ROB",
-            "Robin": "Robin", "Rosalina & Luma": "Rosalina_&_Luma", "Roy": "Roy", "Ryu": "Ryu", "Samus": "Samus",
-            "Sephiroth": "Sephiroth", "Sheik": "Sheik", "Shulk": "Shulk", "Simon": "Simon", "Snake": "Snake",
-            "Sora": "Sora", "Sonic": "Sonic", "Steve": "Steve", "Terry": "Terry", "Toon Link": "Toon_Link",
-            "Villager": "Villager", "Wario": "Wario", "Wii Fit Trainer": "Wii_Fit_Trainer", "Wolf": "Wolf",
-            "Yoshi": "Yoshi", "Young Link": "Young_Link", "Zelda": "Zelda", "Zero Suit Samus": "Zero_Suit_Samus"
-        };
-        const p1Character = document.getElementById('p1Character');
-        const p2Character = document.getElementById('p2Character');
-        Object.keys(characters).forEach(char => {
-            const option1 = document.createElement('option');
-            option1.value = char;
-            option1.textContent = char;
-            p1Character.appendChild(option1);
-            const option2 = document.createElement('option');
-            option2.value = char;
-            option2.textContent = char;
-            p2Character.appendChild(option2);
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Player 1 Card -->
+        <div class="card space-y-4">
+            <h2 class="text-xl font-bold text-center text-orange-500" style="font-family: 'Oswald', sans-serif;">Player 1</h2>
+            <div><label class="block mb-1 text-sm font-medium">Sponsor</label><input id="p1Sponsor" type="text" class="input-field"></div>
+            <div><label class="block mb-1 text-sm font-medium">Tag</label><input id="p1Tag" type="text" class="input-field"></div>
+            <div><label class="block mb-1 text-sm font-medium">Pronouns</label><input id="p1Pronouns" type="text" class="input-field"></div>
+            <div><label class="block mb-1 text-sm font-medium">Status (L/W)</label><input id="p1Status" type="text" class="input-field" placeholder="e.g., Winners"></div>
+             <div>
+                <label class="block mb-1 text-sm font-medium">Score</label>
+                <div class="flex items-center gap-2">
+                    <button id="p1ScoreMinus" class="score-btn minus">-</button>
+                    <input id="p1Score" type="number" class="input-field text-center" value="0">
+                    <button id="p1ScorePlus" class="score-btn plus">+</button>
+                </div>
+            </div>
+            <div><label class="block mb-1 text-sm font-medium">Character</label><select id="p1Character" class="input-field"></select></div>
+        </div>
+
+        <!-- Match Info Card -->
+        <div class="card flex flex-col justify-center space-y-4">
+             <h2 class="text-xl font-bold text-center" style="font-family: 'Oswald', sans-serif;">Match Info</h2>
+             <div><label class="block mb-1 text-sm font-medium">Round</label><input id="round" type="text" class="input-field" placeholder="e.g., Winners Finals"></div>
+             <div>
+                 <label class="block mb-1 text-sm font-medium">Format</label>
+                 <div class="flex gap-2">
+                     <select id="formatPrefix" class="input-field w-1/2">
+                         <option>Best of</option>
+                         <option>First to</option>
+                     </select>
+                     <input id="formatNumber" type="number" class="input-field w-1/2" placeholder="e.g., 5">
+                 </div>
+            </div>
+            <button id="swapPlayers" class="btn btn-secondary w-full">Swap Players</button>
+            <button id="forceUpdate" class="btn btn-primary w-full">Force Update</button>
+        </div>
+
+        <!-- Player 2 Card -->
+        <div class="card space-y-4">
+            <h2 class="text-xl font-bold text-center text-orange-500" style="font-family: 'Oswald', sans-serif;">Player 2</h2>
+            <div><label class="block mb-1 text-sm font-medium">Sponsor</label><input id="p2Sponsor" type="text" class="input-field"></div>
+            <div><label class="block mb-1 text-sm font-medium">Tag</label><input id="p2Tag" type="text" class="input-field"></div>
+            <div><label class="block mb-1 text-sm font-medium">Pronouns</label><input id="p2Pronouns" type="text" class="input-field"></div>
+            <div><label class="block mb-1 text-sm font-medium">Status (L/W)</label><input id="p2Status" type="text" class="input-field" placeholder="e.g., Losers"></div>
+            <div>
+                <label class="block mb-1 text-sm font-medium">Score</label>
+                <div class="flex items-center gap-2">
+                    <button id="p2ScoreMinus" class="score-btn minus">-</button>
+                    <input id="p2Score" type="number" class="input-field text-center" value="0">
+                    <button id="p2ScorePlus" class="score-btn plus">+</button>
+                </div>
+            </div>
+            <div><label class="block mb-1 text-sm font-medium">Character</label><select id="p2Character" class="input-field"></select></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        // setDoc was missing from this import list, causing the error.
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { firebaseConfig } from './firebase-config.js';
+
+        const characters = [
+            "Banjo & Kazooie", "Bayonetta", "Bowser", "Bowser Jr.", "Byleth", "Captain Falcon", "Chrom", "Cloud", "Corrin", "Daisy",
+            "Dark Pit", "Dark Samus", "Diddy Kong", "Donkey Kong", "Dr. Mario", "Duck Hunt", "Falco", "Fox", "Ganondorf",
+            "Greninja", "Hero", "Ice Climbers", "Ike", "Incineroar", "Inkling", "Isabelle", "Jigglypuff", "Joker", "Kazuya",
+            "Ken", "King Dedede", "King K. Rool", "Kirby", "Link", "Little Mac", "Lucario", "Lucas", "Lucina", "Luigi", "Mario",
+            "Marth", "Mega Man", "Meta Knight", "Mewtwo", "Mii Brawler", "Mii Gunner", "Mii Swordfighter", "Min Min",
+            "Mr. Game & Watch", "Ness", "Olimar", "Pac-Man", "Palutena", "Peach", "Pichu", "Pikachu", "Piranha Plant", "Pit",
+            "Pyra and Mythra", "Richter", "Ridley", "R.O.B.", "Robin", "Rosalina & Luma", "Roy", "Ryu", "Samus", "Sephiroth",
+            "Sheik", "Shulk", "Simon", "Snake", "Sora", "Sonic", "Steve", "Terry", "Toon Link", "Villager", "Wario",
+            "Wii Fit Trainer", "Wolf", "Yoshi", "Young Link", "Zelda", "Zero Suit Samus"
+        ];
+
+        const p1CharField = document.getElementById('p1Character');
+        const p2CharField = document.getElementById('p2Character');
+        characters.forEach(char => {
+            p1CharField.innerHTML += `<option value="${char}">${char}</option>`;
+            p2CharField.innerHTML += `<option value="${char}">${char}</option>`;
         });
 
-        // --- Firebase Logic ---
-        let db, auth, docRef;
+        const statusText = document.getElementById('status-text');
+        const statusDot = document.getElementById('status-dot');
+        let db;
+        const appId = 'stillwater-smash-overlay';
+        let docRef;
 
-        const main = async () => {
-            try {
-                const { firebaseConfig } = await import('./firebase-config.js');
-                const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
-                const { getFirestore, doc, setDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
-                const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
-
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                await signInAnonymously(auth);
-                
-                const appId = 'stillwater-smash-overlay'; 
-                docRef = doc(db, 'overlays', appId);
-
-                onSnapshot(docRef, (doc) => {
-                    // This function will run when the page loads and whenever data changes in the database.
-                    if (doc.exists()) {
-                       // We can add logic here to load data if needed, but for now we just confirm connection.
-                    }
-                    updateStatus(true, 'Connected & Synced');
-                }, (error) => {
-                    console.error("Snapshot error:", error);
-                    updateStatus(false, 'Sync Failed');
-                });
-
-            } catch (error) {
-                console.error("Firebase connection error:", error);
-                updateStatus(false, `DB Connection Failed: ${error.message}`);
-                // The full error message will now be displayed, which is very helpful for debugging.
-            }
+        const setStatus = (text, color) => {
+            statusText.textContent = text;
+            statusDot.className = `w-3 h-3 ${color} rounded-full`;
         };
 
-        const updateStatus = (isSuccess, message) => {
-            const statusDiv = document.getElementById('db-status');
-            const textSpan = statusDiv.querySelector('span');
-            const dotDiv = statusDiv.querySelector('div');
-            textSpan.textContent = message;
-            dotDiv.className = `w-3 h-3 rounded-full ${isSuccess ? 'bg-green-500' : 'bg-red-500'}`;
-        };
-
-        const saveData = () => {
-            if (!docRef) {
-                 console.error("Database reference not initialized. Cannot save data.");
-                 updateStatus(false, 'Not Connected');
-                 return;
-            }
+        const saveData = async () => {
+            if (!db) return;
             const data = {
                 p1Sponsor: document.getElementById('p1Sponsor').value,
                 p1Tag: document.getElementById('p1Tag').value,
                 p1Pronouns: document.getElementById('p1Pronouns').value,
                 p1Status: document.getElementById('p1Status').value,
                 p1Score: parseInt(document.getElementById('p1Score').value),
-                p1Character: document.getElementById('p1Character').value,
+                p1Character: p1CharField.value,
                 p2Sponsor: document.getElementById('p2Sponsor').value,
                 p2Tag: document.getElementById('p2Tag').value,
                 p2Pronouns: document.getElementById('p2Pronouns').value,
                 p2Status: document.getElementById('p2Status').value,
                 p2Score: parseInt(document.getElementById('p2Score').value),
-                p2Character: document.getElementById('p2Character').value,
+                p2Character: p2CharField.value,
                 round: document.getElementById('round').value,
-                format: `${document.getElementById('formatType').value} ${document.getElementById('formatNumber').value}`
+                formatPrefix: document.getElementById('formatPrefix').value,
+                formatNumber: document.getElementById('formatNumber').value,
             };
-            setDoc(docRef, data, { merge: true }).then(() => {
-                updateStatus(true, 'Saved');
-            }).catch(e => {
-                console.error("Save error:", e);
-                updateStatus(false, 'Save Failed');
-            });
+            try {
+                await setDoc(docRef, data);
+                setStatus('Connected & Synced', 'bg-green-500');
+            } catch (error) {
+                console.error("Failed to save data:", error);
+                setStatus('Save Error', 'bg-red-500');
+            }
         };
-        
-        // --- Event Listeners ---
+
+        const main = async () => {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                const auth = getAuth(app);
+                await signInAnonymously(auth);
+
+                docRef = doc(db, 'overlays', appId);
+
+                onSnapshot(docRef, (doc) => {
+                    const data = doc.exists() ? doc.data() : {};
+                    // Logic to populate fields from snapshot can go here if needed
+                });
+
+                setStatus('Connected', 'bg-green-500');
+            } catch (error) {
+                console.error("DB Connection Failed:", error);
+                setStatus('DB Connection Failed', 'bg-red-500');
+            }
+        };
+
         document.getElementById('forceUpdate').addEventListener('click', saveData);
         document.querySelectorAll('input, select').forEach(el => el.addEventListener('change', saveData));
-        document.getElementById('p1ScoreUp').addEventListener('click', () => { document.getElementById('p1Score').value++; saveData(); });
-        document.getElementById('p1ScoreDown').addEventListener('click', () => { document.getElementById('p1Score').value--; saveData(); });
-        document.getElementById('p2ScoreUp').addEventListener('click', () => { document.getElementById('p2Score').value++; saveData(); });
-        document.getElementById('p2ScoreDown').addEventListener('click', () => { document.getElementById('p2Score').value--; saveData(); });
+
+        document.getElementById('p1ScorePlus').addEventListener('click', () => { document.getElementById('p1Score').value++; saveData(); });
+        document.getElementById('p1ScoreMinus').addEventListener('click', () => { document.getElementById('p1Score').value--; saveData(); });
+        document.getElementById('p2ScorePlus').addEventListener('click', () => { document.getElementById('p2Score').value++; saveData(); });
+        document.getElementById('p2ScoreMinus').addEventListener('click', () => { document.getElementById('p2Score').value--; saveData(); });
+
         document.getElementById('swapPlayers').addEventListener('click', () => {
             const p1Fields = ['p1Sponsor', 'p1Tag', 'p1Pronouns', 'p1Status', 'p1Score', 'p1Character'];
             const p2Fields = ['p2Sponsor', 'p2Tag', 'p2Pronouns', 'p2Status', 'p2Score', 'p2Character'];
-            p1Fields.forEach((field, i) => {
-                const p1 = document.getElementById(field);
+            p1Fields.forEach((id, i) => {
+                const p1 = document.getElementById(id);
                 const p2 = document.getElementById(p2Fields[i]);
                 [p1.value, p2.value] = [p2.value, p1.value];
             });
             saveData();
         });
-        
-        // --- Initial Load ---
+
         main();
     </script>
 </body>
