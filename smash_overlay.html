@@ -167,39 +167,49 @@
             const p2CharFile = characters[data.p2Character];
             document.getElementById('p2Character').src = p2CharFile ? `${stockIconBaseUrl}${p2CharFile}.png` : 'https://placehold.co/80x80/232323/232323?text=';
 
-            requestAnimationFrame(() => {
-                adjustFontSize('p1-name-container');
-                adjustFontSize('p2-name-container');
-            });
+            // Use a timeout to ensure the DOM is updated before we measure it
+            setTimeout(() => {
+                adjustFontSize('p1');
+                adjustFontSize('p2');
+            }, 50); 
         };
         
-        // This new function reduces font size until the text fits, which is more reliable.
-        const adjustFontSize = (containerId) => {
-            const container = document.getElementById(containerId);
-            // Corrected and simplified selectors
-            const sponsor = document.getElementById(containerId.replace('name-container', 'Sponsor'));
-            const tag = document.getElementById(containerId.replace('name-container', 'Tag'));
+        // REWRITTEN scaling function for better reliability and independent scaling.
+        const adjustFontSize = (playerId) => {
+            const container = document.getElementById(`${playerId}-name-container`);
+            const sponsor = document.getElementById(`${playerId}Sponsor`);
+            const tag = document.getElementById(`${playerId}Tag`);
             
-            // 1. Reset to max size for accurate measurement
             const maxTagSize = 2.2;
             const maxSponsorSize = 1.25;
+            const minTagSize = 1.2;
+            const minSponsorSize = 0.8;
+            const maxWidth = 350;
+
+            // 1. Reset font sizes to maximum to get an accurate overflow measurement.
             tag.style.fontSize = `${maxTagSize}rem`;
             sponsor.style.fontSize = `${maxSponsorSize}rem`;
 
-            // 2. Allow browser to render, then measure
-            requestAnimationFrame(() => {
-                const maxWidth = 350; // The fixed width of the parent container
+            // 2. Measure the content width after the browser has rendered the max size.
+            // Using a timeout is more robust than requestAnimationFrame for this.
+            setTimeout(() => {
                 const currentWidth = container.scrollWidth;
 
-                // 3. If it overflows, calculate the precise scale and apply it
+                // 3. If it overflows, calculate a new font size. Otherwise, ensure it's at max.
                 if (currentWidth > maxWidth) {
-                    const scale = (maxWidth / currentWidth) * 0.98; // 0.98 gives a little extra padding
-                    const newTagSize = Math.max(1.2, maxTagSize * scale); // Enforce a minimum size
-                    const newSponsorSize = Math.max(0.8, maxSponsorSize * scale);
+                    const scale = maxWidth / currentWidth;
+                    const newTagSize = Math.max(minTagSize, maxTagSize * scale);
+                    const newSponsorSize = Math.max(minSponsorSize, maxSponsorSize * scale);
+                    
                     tag.style.fontSize = `${newTagSize}rem`;
                     sponsor.style.fontSize = `${newSponsorSize}rem`;
                 }
-            });
+                // If a short name is entered after a long one, this ensures it scales back up.
+                else {
+                    tag.style.fontSize = `${maxTagSize}rem`;
+                    sponsor.style.fontSize = `${maxSponsorSize}rem`;
+                }
+            }, 0);
         };
 
         const main = async () => {
