@@ -164,7 +164,6 @@
             document.getElementById('p2Score').textContent = data.p2Score ?? 0;
             
             document.getElementById('round').textContent = data.round || 'Grand Finals';
-            const [formatType, formatNumber] = (data.format || 'Best of 5').split(' ');
             document.getElementById('format').textContent = `${data.formatPrefix || 'Best of'} ${data.formatNumber || 5}`;
 
             const p1CharFile = characters[data.p1Character];
