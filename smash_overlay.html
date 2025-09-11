@@ -19,22 +19,21 @@
             font-family: 'Oswald', sans-serif;
             text-transform: uppercase;
             font-weight: 700;
-            font-size: 2.2rem;
+            font-size: 2.2rem; /* Max size */
             text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
             transition: font-size 0.2s ease-in-out;
         }
         .secondary-text {
             font-family: 'Roboto Slab', serif;
             text-transform: uppercase;
-            font-size: 1.25rem; /* Increased size for visibility */
+            font-size: 1.25rem; /* Max size */
             letter-spacing: 0.05em;
             transition: font-size 0.2s ease-in-out;
-            /* Added subtle shadow for better visibility */
-            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            text-shadow: -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000;
         }
-        /* Overriding shadow for better contrast on different backgrounds */
-        .p1-bar .secondary-text { color: #E5E7EB; } 
-        .p2-bar .secondary-text { color: #D1D5DB; } 
+        /* Increased brightness for better visibility */
+        .p1-bar .secondary-text { color: #f0f0f0; } 
+        .p2-bar .secondary-text { color: #e0e0e0; } 
         
         .score-box {
             background-color: white;
@@ -80,8 +79,9 @@
                 <span id="p1Status" class="secondary-text text-black text-xs -mt-1" style="text-shadow: none;">Winners</span>
             </div>
             <div class="p1-bar h-[70px] flex items-center justify-end pr-4" style="width: 450px;">
-                <div class="flex flex-col items-end text-right overflow-hidden">
-                    <div id="p1-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
+                <!-- This parent now has a fixed width for accurate measurement -->
+                <div class="flex flex-col items-end text-right overflow-hidden w-[350px]">
+                    <div id="p1-name-container" class="flex items-baseline gap-3 whitespace-nowrap self-end">
                         <span id="p1Sponsor" class="secondary-text"></span>
                         <span id="p1Tag" class="player-tag-text">Player 1</span>
                     </div>
@@ -94,8 +94,8 @@
         <div class="h-full flex items-center">
              <div class="p2-bar h-[70px] flex items-center justify-start pl-4" style="width: 450px;">
                  <img id="p2Character" src="https://placehold.co/80x80/232323/232323?text=" class="h-[70px] w-auto mr-3">
-                 <div class="flex flex-col items-start text-left overflow-hidden">
-                    <div id="p2-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
+                 <div class="flex flex-col items-start text-left overflow-hidden w-[350px]">
+                    <div id="p2-name-container" class="flex items-baseline gap-3 whitespace-nowrap self-start">
                         <span id="p2Sponsor" class="secondary-text"></span>
                         <span id="p2Tag" class="player-tag-text">Player 2</span>
                     </div>
@@ -176,28 +176,31 @@
         // This new function reduces font size until the text fits, which is more reliable.
         const adjustFontSize = (containerId) => {
             const container = document.getElementById(containerId);
-            const sponsor = container.querySelector('#' + containerId.replace('-name-container', 'Sponsor'));
-            const tag = container.querySelector('#' + containerId.replace('-name-container', 'Tag'));
+            // Corrected and simplified selectors
+            const sponsor = document.getElementById(containerId.replace('name-container', 'Sponsor'));
+            const tag = document.getElementById(containerId.replace('name-container', 'Tag'));
             
-            // Set initial sizes
-            let tagSize = 2.2;
-            let sponsorSize = 1.25;
-            tag.style.fontSize = `${tagSize}rem`;
-            sponsor.style.fontSize = `${sponsorSize}rem`;
+            // 1. Reset to max size for accurate measurement
+            const maxTagSize = 2.2;
+            const maxSponsorSize = 1.25;
+            tag.style.fontSize = `${maxTagSize}rem`;
+            sponsor.style.fontSize = `${maxSponsorSize}rem`;
 
-            const maxWidth = 350; 
-
-            // Use a loop to check width and reduce size if needed
+            // 2. Allow browser to render, then measure
             requestAnimationFrame(() => {
-                 while (container.scrollWidth > maxWidth && tagSize > 1.0) {
-                    tagSize -= 0.1;
-                    sponsorSize -= 0.05;
-                    tag.style.fontSize = `${tagSize}rem`;
-                    sponsor.style.fontSize = `${sponsorSize}rem`;
+                const maxWidth = 350; // The fixed width of the parent container
+                const currentWidth = container.scrollWidth;
+
+                // 3. If it overflows, calculate the precise scale and apply it
+                if (currentWidth > maxWidth) {
+                    const scale = (maxWidth / currentWidth) * 0.98; // 0.98 gives a little extra padding
+                    const newTagSize = Math.max(1.2, maxTagSize * scale); // Enforce a minimum size
+                    const newSponsorSize = Math.max(0.8, maxSponsorSize * scale);
+                    tag.style.fontSize = `${newTagSize}rem`;
+                    sponsor.style.fontSize = `${newSponsorSize}rem`;
                 }
             });
         };
-
 
         const main = async () => {
             try {
@@ -205,10 +208,8 @@
                 const db = getFirestore(app);
                 const auth = getAuth(app);
                 await signInAnonymously(auth);
-
                 const appId = 'stillwater-smash-overlay'; 
                 const docRef = doc(db, 'overlays', appId);
-
                 onSnapshot(docRef, (doc) => {
                     updateUI(doc.exists() ? doc.data() : {});
                 });
