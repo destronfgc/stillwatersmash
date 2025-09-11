@@ -1,5 +1,5 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyBTeMGX5wgSubD_8S3_1b7Ggn-Xn3PfHUI",
+  apiKey: "AIzaSyBTeMGX5wg5ubD_8s3_1b7Ggn-Xn3PfHUI",
   authDomain: "stillwater-overlay.firebaseapp.com",
   projectId: "stillwater-overlay",
   storageBucket: "stillwater-overlay.firebasestorage.app",
