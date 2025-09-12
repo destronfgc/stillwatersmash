@@ -31,8 +31,10 @@
             transition: font-size 0.2s ease-in-out;
             text-shadow: -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000;
         }
-        .p1-bar .secondary-text { color: #f0f0f0; } 
-        .p2-bar .secondary-text { color: #e0e0e0; } 
+        /* Increased brightness for better visibility */
+        .p1-bar .secondary-text, .p2-bar .secondary-text { 
+            color: #ffffff; 
+        } 
         
         .score-box {
             background-color: white;
@@ -77,9 +79,10 @@
                 <span id="p1Score" class="text-4xl leading-none">0</span>
                 <span id="p1Status" class="secondary-text text-black text-xs -mt-1" style="text-shadow: none;">Winners</span>
             </div>
-            <div class="p1-bar h-[70px] flex items-center justify-end pr-4" style="width: 450px;">
-                <div class="flex flex-col items-end text-right overflow-hidden w-[350px]">
-                    <div id="p1-name-container" class="flex items-baseline gap-3 whitespace-nowrap self-end">
+            <div class="p1-bar h-[70px] flex items-center justify-center pr-4" style="width: 450px;">
+                <!-- This container is now centered -->
+                <div class="flex flex-col items-center text-center overflow-hidden w-[350px]">
+                    <div id="p1-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
                         <span id="p1Sponsor" class="secondary-text"></span>
                         <span id="p1Tag" class="player-tag-text">Player 1</span>
                     </div>
@@ -90,10 +93,11 @@
         </div>
         
         <div class="h-full flex items-center">
-             <div class="p2-bar h-[70px] flex items-center justify-start pl-4" style="width: 450px;">
+             <div class="p2-bar h-[70px] flex items-center justify-center pl-4" style="width: 450px;">
                  <img id="p2Character" src="https://placehold.co/80x80/232323/232323?text=" class="h-[70px] w-auto mr-3">
-                 <div class="flex flex-col items-start text-left overflow-hidden w-[350px]">
-                    <div id="p2-name-container" class="flex items-baseline gap-3 whitespace-nowrap self-start">
+                 <!-- This container is now centered -->
+                 <div class="flex flex-col items-center text-center overflow-hidden w-[350px]">
+                    <div id="p2-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
                         <span id="p2Sponsor" class="secondary-text"></span>
                         <span id="p2Tag" class="player-tag-text">Player 2</span>
                     </div>
@@ -120,15 +124,14 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { firebaseConfig } from './firebase-config.js';
 
-        // Helper function to format names for your GitHub file structure
         const formatCharNameForFile = (name) => {
             if (!name) return '';
             return name.replace(/ & /g, 'And').replace(/\./g, '').replace(/ /g, '');
         };
-
         const stockIconBaseUrl = "https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/stockicons/";
 
-        const updateUI = (data) => {
+        // This function ONLY updates the text content of the elements
+        const updateUIText = (data) => {
             document.getElementById('p1Sponsor').textContent = data.p1Sponsor || '';
             document.getElementById('p1Tag').textContent = data.p1Tag || 'Player 1';
             document.getElementById('p1Pronouns').textContent = data.p1Pronouns || '';
@@ -151,43 +154,43 @@
             const p2CharFile = formatCharNameForFile(data.p2Character);
             const p2Alt = data.p2Alt || 1;
             document.getElementById('p2Character').src = p2CharFile ? `${stockIconBaseUrl}${p2CharFile}${p2Alt}.png` : 'https://placehold.co/80x80/232323/232323?text=';
-
-            setTimeout(() => {
-                adjustFontSize('p1');
-                adjustFontSize('p2');
-            }, 50); 
         };
         
-        const adjustFontSize = (playerId) => {
+        // This function ONLY handles font scaling, and does it independently for each player
+        const adjustPlayerFontSize = (playerId) => {
             const container = document.getElementById(`${playerId}-name-container`);
             const sponsor = document.getElementById(`${playerId}Sponsor`);
             const tag = document.getElementById(`${playerId}Tag`);
             
             const maxTagSize = 2.2;
             const maxSponsorSize = 1.25;
-            const minTagSize = 1.2;
-            const minSponsorSize = 0.8;
+            const minTagSize = 1.4; // Increased minimum size
+            const minSponsorSize = 0.9; // Increased minimum size
             const maxWidth = 350;
 
+            // 1. Reset font sizes to maximum for an accurate overflow measurement.
             tag.style.fontSize = `${maxTagSize}rem`;
             sponsor.style.fontSize = `${maxSponsorSize}rem`;
 
+            // 2. Use a timeout to ensure the browser has rendered the new text and max font size.
             setTimeout(() => {
                 const currentWidth = container.scrollWidth;
-
+                
+                // 3. If it overflows, calculate a new font size. Otherwise, ensure it's at max.
                 if (currentWidth > maxWidth) {
-                    const scale = maxWidth / currentWidth;
+                    const scale = (maxWidth / currentWidth) * 0.98; // 0.98 gives a little extra padding
                     const newTagSize = Math.max(minTagSize, maxTagSize * scale);
                     const newSponsorSize = Math.max(minSponsorSize, maxSponsorSize * scale);
                     
                     tag.style.fontSize = `${newTagSize}rem`;
                     sponsor.style.fontSize = `${newSponsorSize}rem`;
                 }
+                // This else block is crucial to fix the "short name stays small" bug.
                 else {
                     tag.style.fontSize = `${maxTagSize}rem`;
                     sponsor.style.fontSize = `${maxSponsorSize}rem`;
                 }
-            }, 0);
+            }, 50); // A 50ms delay is usually very reliable.
         };
 
         const main = async () => {
@@ -198,8 +201,14 @@
                 await signInAnonymously(auth);
                 const appId = 'stillwater-smash-overlay'; 
                 const docRef = doc(db, 'overlays', appId);
+
                 onSnapshot(docRef, (doc) => {
-                    updateUI(doc.exists() ? doc.data() : {});
+                    const data = doc.exists() ? doc.data() : {};
+                    // First, update all the text on the screen
+                    updateUIText(data);
+                    // Then, independently adjust the font size for each player
+                    adjustPlayerFontSize('p1');
+                    adjustPlayerFontSize('p2');
                 });
             } catch (error) {
                 console.error("OVERLAY FAILED TO CONNECT:", error);
