@@ -31,17 +31,16 @@
             transition: font-size 0.2s ease-in-out;
             text-shadow: -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000;
         }
-        .p1-bar .secondary-text, .p2-bar .secondary-text { 
-            color: #ffffff; 
-        } 
+        .p1-bar .secondary-text, .p2-bar .secondary-text { color: #ffffff; } 
         
         .score-box {
             background-color: white;
-            color: #FF7300; /* OSU Orange */
+            color: #FF7300;
             font-family: 'Oswald', sans-serif;
             font-weight: 700;
             width: 80px;
             height: 80px;
+            transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
         }
         .p1-score-box { clip-path: polygon(0 0, 100% 0, 100% 100%, 25% 100%, 0 75%); }
         .p2-score-box { clip-path: polygon(0 0, 100% 0, 100% 75%, 75% 100%, 0 100%); }
@@ -67,14 +66,35 @@
             font-weight: 700;
             text-transform: uppercase;
         }
+        
+        /* Animation for score updates */
+        @keyframes score-update-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.25); color: #FFF700; }
+            100% { transform: scale(1); }
+        }
+        .score-updated {
+            animation: score-update-pulse 0.4s ease-in-out;
+        }
+
+        /* Style for set point indicator */
+        @keyframes set-point-glow {
+            0% { box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700; }
+            50% { box-shadow: 0 0 25px #FFD700, 0 0 40px #FFD700; }
+            100% { box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700; }
+        }
+        .set-point {
+            animation: set-point-glow 1.5s infinite;
+        }
+
     </style>
 </head>
 <body class="flex items-start justify-center pt-8">
 
     <div class="w-[1200px] h-[120px] flex items-center justify-between relative">
-        
+        <!-- Player 1 -->
         <div class="h-full flex items-center">
-            <div class="score-box p1-score-box flex flex-col items-center justify-center">
+            <div id="p1ScoreBox" class="score-box p1-score-box flex flex-col items-center justify-center">
                 <span id="p1Score" class="text-4xl leading-none">0</span>
                 <span id="p1Status" class="secondary-text text-black text-xs -mt-1" style="text-shadow: none;">Winners</span>
             </div>
@@ -90,6 +110,7 @@
             </div>
         </div>
         
+        <!-- Player 2 -->
         <div class="h-full flex items-center">
              <div class="p2-bar h-[70px] flex items-center justify-center pl-4" style="width: 450px;">
                  <img id="p2Character" src="https://placehold.co/80x80/232323/232323?text=" class="h-[70px] w-auto mr-3">
@@ -101,12 +122,13 @@
                     <span id="p2Pronouns" class="secondary-text text-sm"></span>
                 </div>
             </div>
-            <div class="score-box p2-score-box flex flex-col items-center justify-center">
+            <div id="p2ScoreBox" class="score-box p2-score-box flex flex-col items-center justify-center">
                 <span id="p2Score" class="text-4xl leading-none">0</span>
                 <span id="p2Status" class="secondary-text text-black text-xs -mt-1" style="text-shadow: none;">Losers</span>
             </div>
         </div>
 
+        <!-- Centerpiece -->
         <div class="absolute left-1/2 -translate-x-1/2 bottom-[-25px] z-10 flex flex-col items-center">
              <div class="center-logo"></div>
              <div class="match-info-box px-4 py-1 rounded-md text-center -mt-2">
@@ -121,24 +143,26 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { firebaseConfig } from './firebase-config.js';
 
-        // UPDATED function with special rules for tricky character names
         const formatCharNameForFile = (name) => {
-            if (!name) return '';
-            // Handle special cases first for accuracy
+             if (!name) return '';
             switch (name) {
-                case "Ice Climbers": return "IceClimbersPopo"; // Defaulting to Popo as lead
-                case "Pyra and Mythra": return "Pyra"; // Defaulting to Pyra
-                case "R.O.B.": return "Rob"; // Handles casing and dots
-                case "Rosalina & Luma": return "Rosalina"; // Removes the Luma part
-                case "Mr. Game & Watch": return "MrGame&Watch"; // Special case for '&'
+                case "Ice Climbers": return "IceClimbersPopo";
+                case "Pyra and Mythra": return "Pyra";
+                case "R.O.B.": return "Rob";
+                case "Rosalina & Luma": return "Rosalina";
+                case "Mr. Game & Watch": return "MrGame&Watch";
                 default:
-                    // Fallback for all other characters
                     return name.replace(/\./g, '').replace(/ /g, '');
             }
         };
         const stockIconBaseUrl = "https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/stockicons/";
+        let currentData = {};
 
         const updateUIText = (data) => {
+            // Animate score if it increases
+            if (data.p1Score > (currentData.p1Score || 0)) animateScore('p1Score');
+            if (data.p2Score > (currentData.p2Score || 0)) animateScore('p2Score');
+
             document.getElementById('p1Sponsor').textContent = data.p1Sponsor || '';
             document.getElementById('p1Tag').textContent = data.p1Tag || 'Player 1';
             document.getElementById('p1Pronouns').textContent = data.p1Pronouns || '';
@@ -161,17 +185,50 @@
             const p2CharFile = formatCharNameForFile(data.p2Character);
             const p2Alt = data.p2Alt || 1;
             document.getElementById('p2Character').src = p2CharFile ? `${stockIconBaseUrl}${p2CharFile}${p2Alt}.png` : 'https://placehold.co/80x80/232323/232323?text=';
+            
+            checkSetPoint(data);
+            currentData = data; // Update current data for next comparison
         };
         
+        const animateScore = (elementId) => {
+            const el = document.getElementById(elementId);
+            el.classList.add('score-updated');
+            setTimeout(() => el.classList.remove('score-updated'), 400);
+        };
+
+        const checkSetPoint = (data) => {
+            const formatPrefix = data.formatPrefix || 'Best of';
+            const formatNumber = parseInt(data.formatNumber, 10) || 5;
+            let winScore;
+
+            if (formatPrefix === 'Best of') {
+                winScore = Math.ceil(formatNumber / 2);
+            } else { // First to
+                winScore = formatNumber;
+            }
+
+            const p1ScoreBox = document.getElementById('p1ScoreBox');
+            const p2ScoreBox = document.getElementById('p2ScoreBox');
+            
+            if (data.p1Score === winScore - 1) {
+                p1ScoreBox.classList.add('set-point');
+            } else {
+                p1ScoreBox.classList.remove('set-point');
+            }
+
+            if (data.p2Score === winScore - 1) {
+                p2ScoreBox.classList.add('set-point');
+            } else {
+                p2ScoreBox.classList.remove('set-point');
+            }
+        };
+
         const adjustPlayerFontSize = (playerId) => {
             const container = document.getElementById(`${playerId}-name-container`);
             const sponsor = document.getElementById(`${playerId}Sponsor`);
             const tag = document.getElementById(`${playerId}Tag`);
-            
-            const maxTagSize = 2.2;
-            const maxSponsorSize = 1.25;
-            const minTagSize = 1.4;
-            const minSponsorSize = 0.9;
+            const maxTagSize = 2.2; const maxSponsorSize = 1.25;
+            const minTagSize = 1.4; const minSponsorSize = 0.9;
             const maxWidth = 350;
 
             tag.style.fontSize = `${maxTagSize}rem`;
@@ -179,16 +236,13 @@
 
             setTimeout(() => {
                 const currentWidth = container.scrollWidth;
-                
                 if (currentWidth > maxWidth) {
                     const scale = (maxWidth / currentWidth) * 0.98;
                     const newTagSize = Math.max(minTagSize, maxTagSize * scale);
                     const newSponsorSize = Math.max(minSponsorSize, maxSponsorSize * scale);
-                    
                     tag.style.fontSize = `${newTagSize}rem`;
                     sponsor.style.fontSize = `${newSponsorSize}rem`;
-                }
-                else {
+                } else {
                     tag.style.fontSize = `${maxTagSize}rem`;
                     sponsor.style.fontSize = `${maxSponsorSize}rem`;
                 }
