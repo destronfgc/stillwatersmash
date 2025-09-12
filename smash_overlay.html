@@ -31,7 +31,6 @@
             transition: font-size 0.2s ease-in-out;
             text-shadow: -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000;
         }
-        /* Increased brightness for better visibility */
         .p1-bar .secondary-text { color: #f0f0f0; } 
         .p2-bar .secondary-text { color: #e0e0e0; } 
         
@@ -79,7 +78,6 @@
                 <span id="p1Status" class="secondary-text text-black text-xs -mt-1" style="text-shadow: none;">Winners</span>
             </div>
             <div class="p1-bar h-[70px] flex items-center justify-end pr-4" style="width: 450px;">
-                <!-- This parent now has a fixed width for accurate measurement -->
                 <div class="flex flex-col items-end text-right overflow-hidden w-[350px]">
                     <div id="p1-name-container" class="flex items-baseline gap-3 whitespace-nowrap self-end">
                         <span id="p1Sponsor" class="secondary-text"></span>
@@ -122,28 +120,13 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { firebaseConfig } from './firebase-config.js';
 
-        const characters = {
-            "Banjo & Kazooie": "Banjo_&_Kazooie", "Bayonetta": "Bayonetta", "Bowser": "Bowser", "Bowser Jr.": "Bowser_Jr",
-            "Byleth": "Byleth", "Captain Falcon": "Captain_Falcon", "Chrom": "Chrom", "Cloud": "Cloud", "Corrin": "Corrin",
-            "Daisy": "Daisy", "Dark Pit": "Dark_Pit", "Dark Samus": "Dark_Samus", "Diddy Kong": "Diddy_Kong",
-            "Donkey Kong": "Donkey_Kong", "Dr. Mario": "Dr_Mario", "Duck Hunt": "Duck_Hunt", "Falco": "Falco",
-            "Fox": "Fox", "Ganondorf": "Ganondorf", "Greninja": "Greninja", "Hero": "Hero", "Ice Climbers": "Ice_Climbers",
-            "Ike": "Ike", "Incineroar": "Incineroar", "Inkling": "Inkling", "Isabelle": "Isabelle", "Jigglypuff": "Jigglypuff",
-            "Joker": "Joker", "Kazuya": "Kazuya", "Ken": "Ken", "King Dedede": "King_Dedede", "King K. Rool": "King_K_Rool",
-            "Kirby": "Kirby", "Link": "Link", "Little Mac": "Little_Mac", "Lucario": "Lucario", "Lucas": "Lucas",
-            "Lucina": "Lucina", "Luigi": "Luigi", "Mario": "Mario", "Marth": "Marth", "Mega Man": "Mega_Man",
-            "Meta Knight": "Meta_Knight", "Mewtwo": "Mewtwo", "Mii Brawler": "Mii_Brawler", "Mii Gunner": "Mii_Gunner",
-            "Mii Swordfighter": "Mii_Swordfighter", "Min Min": "Min_Min", "Mr. Game & Watch": "Mr_Game_&_Watch",
-            "Ness": "Ness", "Olimar": "Olimar", "Pac-Man": "Pac-Man", "Palutena": "Palutena", "Peach": "Peach",
-            "Pichu": "Pichu", "Pikachu": "Pikachu", "Piranha Plant": "Piranha_Plant", "Pit": "Pit",
-            "Pyra and Mythra": "Pyra_Mythra", "Richter": "Richter", "Ridley": "Ridley", "R.O.B.": "ROB",
-            "Robin": "Robin", "Rosalina & Luma": "Rosalina_&_Luma", "Roy": "Roy", "Ryu": "Ryu", "Samus": "Samus",
-            "Sephiroth": "Sephiroth", "Sheik": "Sheik", "Shulk": "Shulk", "Simon": "Simon", "Snake": "Snake",
-            "Sora": "Sora", "Sonic": "Sonic", "Steve": "Steve", "Terry": "Terry", "Toon Link": "Toon_Link",
-            "Villager": "Villager", "Wario": "Wario", "Wii Fit Trainer": "Wii_Fit_Trainer", "Wolf": "Wolf",
-            "Yoshi": "Yoshi", "Young Link": "Young_Link", "Zelda": "Zelda", "Zero Suit Samus": "Zero_Suit_Samus"
+        // Helper function to format names for your GitHub file structure
+        const formatCharNameForFile = (name) => {
+            if (!name) return '';
+            return name.replace(/ & /g, 'And').replace(/\./g, '').replace(/ /g, '');
         };
-        const stockIconBaseUrl = "https://www.ssbwiki.com/images/stock/ssbu/";
+
+        const stockIconBaseUrl = "https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/stockicons/";
 
         const updateUI = (data) => {
             document.getElementById('p1Sponsor').textContent = data.p1Sponsor || '';
@@ -161,20 +144,20 @@
             document.getElementById('round').textContent = data.round || 'Grand Finals';
             document.getElementById('format').textContent = `${data.formatPrefix || 'Best of'} ${data.formatNumber || 5}`;
 
-            const p1CharFile = characters[data.p1Character];
-            document.getElementById('p1Character').src = p1CharFile ? `${stockIconBaseUrl}${p1CharFile}.png` : 'https://placehold.co/80x80/FF7300/FF7300?text=';
+            const p1CharFile = formatCharNameForFile(data.p1Character);
+            const p1Alt = data.p1Alt || 1;
+            document.getElementById('p1Character').src = p1CharFile ? `${stockIconBaseUrl}${p1CharFile}${p1Alt}.png` : 'https://placehold.co/80x80/FF7300/FF7300?text=';
             
-            const p2CharFile = characters[data.p2Character];
-            document.getElementById('p2Character').src = p2CharFile ? `${stockIconBaseUrl}${p2CharFile}.png` : 'https://placehold.co/80x80/232323/232323?text=';
+            const p2CharFile = formatCharNameForFile(data.p2Character);
+            const p2Alt = data.p2Alt || 1;
+            document.getElementById('p2Character').src = p2CharFile ? `${stockIconBaseUrl}${p2CharFile}${p2Alt}.png` : 'https://placehold.co/80x80/232323/232323?text=';
 
-            // Use a timeout to ensure the DOM is updated before we measure it
             setTimeout(() => {
                 adjustFontSize('p1');
                 adjustFontSize('p2');
             }, 50); 
         };
         
-        // REWRITTEN scaling function for better reliability and independent scaling.
         const adjustFontSize = (playerId) => {
             const container = document.getElementById(`${playerId}-name-container`);
             const sponsor = document.getElementById(`${playerId}Sponsor`);
@@ -186,16 +169,12 @@
             const minSponsorSize = 0.8;
             const maxWidth = 350;
 
-            // 1. Reset font sizes to maximum to get an accurate overflow measurement.
             tag.style.fontSize = `${maxTagSize}rem`;
             sponsor.style.fontSize = `${maxSponsorSize}rem`;
 
-            // 2. Measure the content width after the browser has rendered the max size.
-            // Using a timeout is more robust than requestAnimationFrame for this.
             setTimeout(() => {
                 const currentWidth = container.scrollWidth;
 
-                // 3. If it overflows, calculate a new font size. Otherwise, ensure it's at max.
                 if (currentWidth > maxWidth) {
                     const scale = maxWidth / currentWidth;
                     const newTagSize = Math.max(minTagSize, maxTagSize * scale);
@@ -204,7 +183,6 @@
                     tag.style.fontSize = `${newTagSize}rem`;
                     sponsor.style.fontSize = `${newSponsorSize}rem`;
                 }
-                // If a short name is entered after a long one, this ensures it scales back up.
                 else {
                     tag.style.fontSize = `${maxTagSize}rem`;
                     sponsor.style.fontSize = `${maxSponsorSize}rem`;
