@@ -53,7 +53,10 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Player 1 Column -->
         <div class="card p-6 flex flex-col gap-4">
-            <h2 class="text-xl font-bold font-['Oswald'] text-[#FF7300]">Player 1</h2>
+            <div class="flex justify-between items-center">
+                 <h2 class="text-xl font-bold font-['Oswald'] text-[#FF7300]">Player 1</h2>
+                 <button id="p1Clear" class="btn btn-secondary text-xs py-1 px-3">Clear</button>
+            </div>
             <input id="p1Sponsor" class="input-field" placeholder="Sponsor">
             <input id="p1Tag" class="input-field" placeholder="Tag">
             <input id="p1Pronouns" class="input-field" placeholder="Pronouns">
@@ -71,7 +74,8 @@
             <div class="pt-4 border-t border-gray-700">
                 <h3 class="font-bold mb-2">Player Presets</h3>
                 <div class="flex gap-2">
-                    <select id="p1Preset" class="input-field"><option>Load Preset...</option></select>
+                    <select id="p1Preset" class="input-field"><option>Select Preset...</option></select>
+                    <button id="p1PresetLoad" class="btn btn-secondary text-sm p-2">Load</button>
                     <button id="p1PresetDelete" class="btn btn-danger text-sm p-2">Del</button>
                 </div>
                 <button id="p1PresetSave" class="btn btn-secondary w-full mt-2">Save Current as Preset</button>
@@ -96,7 +100,10 @@
 
         <!-- Player 2 Column -->
         <div class="card p-6 flex flex-col gap-4">
-            <h2 class="text-xl font-bold font-['Oswald'] text-[#FF7300]">Player 2</h2>
+            <div class="flex justify-between items-center">
+                 <h2 class="text-xl font-bold font-['Oswald'] text-[#FF7300]">Player 2</h2>
+                 <button id="p2Clear" class="btn btn-secondary text-xs py-1 px-3">Clear</button>
+            </div>
             <input id="p2Sponsor" class="input-field" placeholder="Sponsor">
             <input id="p2Tag" class="input-field" placeholder="Tag">
             <input id="p2Pronouns" class="input-field" placeholder="Pronouns">
@@ -114,7 +121,8 @@
             <div class="pt-4 border-t border-gray-700">
                 <h3 class="font-bold mb-2">Player Presets</h3>
                 <div class="flex gap-2">
-                    <select id="p2Preset" class="input-field"><option>Load Preset...</option></select>
+                    <select id="p2Preset" class="input-field"><option>Select Preset...</option></select>
+                    <button id="p2PresetLoad" class="btn btn-secondary text-sm p-2">Load</button>
                     <button id="p2PresetDelete" class="btn btn-danger text-sm p-2">Del</button>
                 </div>
                 <button id="p2PresetSave" class="btn btn-secondary w-full mt-2">Save Current as Preset</button>
@@ -128,6 +136,7 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { firebaseConfig } from './firebase-config.js';
 
+        // --- CHARACTER LIST (REMAINS THE SAME) ---
         const characters = [
             "Banjo & Kazooie", "Bayonetta", "Bowser", "Bowser Jr.", "Byleth", "Captain Falcon", "Chrom", "Cloud", "Corrin",
             "Daisy", "Dark Pit", "Dark Samus", "Diddy Kong", "Donkey Kong", "Dr. Mario", "Duck Hunt", "Falco", "Fox", 
@@ -143,15 +152,18 @@
         const p1CharSelect = document.getElementById('p1Character');
         const p2CharSelect = document.getElementById('p2Character');
         characters.forEach(char => {
-            p1CharSelect.innerHTML += `<option value="${char}">${char}</option>`;
-            p2CharSelect.innerHTML += `<option value="${char}">${char}</option>`;
+            const option = `<option value="${char}">${char}</option>`;
+            p1CharSelect.innerHTML += option;
+            p2CharSelect.innerHTML += option;
         });
+        // --- END CHARACTER LIST ---
 
         const statusIndicator = document.getElementById('status-indicator');
         const statusText = document.getElementById('status-text');
         let db, auth, docRef, presetsColRef;
         const appId = 'stillwater-smash-overlay';
 
+        // --- MAIN CONNECTION ---
         const main = async () => {
             try {
                 const app = initializeApp(firebaseConfig);
@@ -162,16 +174,14 @@
                 docRef = doc(db, 'overlays', appId);
                 presetsColRef = collection(db, 'overlays', appId, 'presets');
 
-                statusIndicator.classList.remove('bg-yellow-500');
-                statusIndicator.classList.add('bg-green-500');
+                statusIndicator.classList.replace('bg-yellow-500', 'bg-green-500');
                 statusText.textContent = 'Connected & Synced';
                 loadInitialData();
                 setupListeners();
                 setupPresetListeners();
             } catch (error) {
                 console.error("DB connection failed:", error);
-                statusIndicator.classList.remove('bg-yellow-500');
-                statusIndicator.classList.add('bg-red-500');
+                statusIndicator.classList.replace('bg-yellow-500', 'bg-red-500');
                 statusText.textContent = 'DB Connection Failed';
             }
         };
@@ -185,6 +195,8 @@
                     if (el) el.value = data[key];
                 });
             }
+            // IMPORTANT: Check status visibility on initial load
+            handleRoundChange(false); // Pass false to prevent saving on load
         };
 
         const saveData = async () => {
@@ -207,8 +219,38 @@
             }
         };
         
+        // --- NEW: LOGIC FOR GRAND FINALS STATUS ---
+        const handleRoundChange = (shouldSave = true) => {
+            const roundText = document.getElementById('round').value.toLowerCase();
+            const p1StatusInput = document.getElementById('p1Status');
+            const p2StatusInput = document.getElementById('p2Status');
+            const isGrands = roundText.includes('grand') || roundText.includes('true');
+
+            p1StatusInput.style.display = isGrands ? 'block' : 'none';
+            p2StatusInput.style.display = isGrands ? 'block' : 'none';
+
+            if (isGrands) {
+                // Set default values ONLY if they are currently empty
+                if (!p1StatusInput.value) p1StatusInput.value = 'Winners';
+                if (!p2StatusInput.value) p2StatusInput.value = 'Losers';
+            } else {
+                p1StatusInput.value = ''; // Clear value so it's hidden on overlay
+                p2StatusInput.value = '';
+            }
+
+            if (shouldSave) {
+                saveData();
+            }
+        };
+
+        // --- UPDATED LISTENERS ---
         const setupListeners = () => {
-            document.querySelectorAll('input, select').forEach(el => el.addEventListener('change', saveData));
+            document.querySelectorAll('input, select').forEach(el => {
+                if(el.id !== 'round') { // Round has a special listener now
+                    el.addEventListener('change', saveData)
+                }
+            });
+            document.getElementById('round').addEventListener('input', () => handleRoundChange(true));
             document.getElementById('forceUpdate').addEventListener('click', saveData);
 
             document.getElementById('p1ScorePlus').addEventListener('click', () => { document.getElementById('p1Score').value++; saveData(); });
@@ -217,8 +259,8 @@
             document.getElementById('p2ScoreMinus').addEventListener('click', () => { document.getElementById('p2Score').value--; saveData(); });
 
             document.getElementById('swapPlayers').addEventListener('click', () => {
-                const p1Fields = ['Sponsor', 'Tag', 'Pronouns', 'Status', 'Score', 'Character', 'Alt'];
-                p1Fields.forEach(field => {
+                const fields = ['Sponsor', 'Tag', 'Pronouns', 'Status', 'Score', 'Character', 'Alt'];
+                fields.forEach(field => {
                     const p1El = document.getElementById(`p1${field}`);
                     const p2El = document.getElementById(`p2${field}`);
                     const temp = p1El.value;
@@ -231,21 +273,39 @@
             document.getElementById('resetMatch').addEventListener('click', () => {
                 document.getElementById('p1Score').value = 0;
                 document.getElementById('p2Score').value = 0;
-                document.getElementById('p1Status').value = 'Winners';
-                document.getElementById('p2Status').value = 'Losers';
+                // Only reset status if it's grands
+                if (document.getElementById('p1Status').style.display !== 'none') {
+                    document.getElementById('p1Status').value = 'Winners';
+                    document.getElementById('p2Status').value = 'Losers';
+                }
+                saveData();
+            });
+
+            // NEW: Clear Player Buttons
+            document.getElementById('p1Clear').addEventListener('click', () => {
+                document.getElementById('p1Sponsor').value = '';
+                document.getElementById('p1Tag').value = '';
+                document.getElementById('p1Pronouns').value = '';
+                saveData();
+            });
+            document.getElementById('p2Clear').addEventListener('click', () => {
+                document.getElementById('p2Sponsor').value = '';
+                document.getElementById('p2Tag').value = '';
+                document.getElementById('p2Pronouns').value = '';
                 saveData();
             });
         };
 
+        // --- UPDATED PRESET LISTENERS ---
         const setupPresetListeners = () => {
             onSnapshot(presetsColRef, (snapshot) => {
                 const p1PresetSelect = document.getElementById('p1Preset');
                 const p2PresetSelect = document.getElementById('p2Preset');
                 const currentP1 = p1PresetSelect.value;
                 const currentP2 = p2PresetSelect.value;
-                p1PresetSelect.innerHTML = '<option>Load Preset...</option>';
-                p2PresetSelect.innerHTML = '<option>Load Preset...</option>';
-                snapshot.forEach(doc => {
+                p1PresetSelect.innerHTML = '<option value="">Select Preset...</option>';
+                p2PresetSelect.innerHTML = '<option value="">Select Preset...</option>';
+                snapshot.docs.sort((a, b) => a.data().tag.localeCompare(b.data().tag)).forEach(doc => {
                     const option = `<option value="${doc.id}">${doc.data().tag}</option>`;
                     p1PresetSelect.innerHTML += option;
                     p2PresetSelect.innerHTML += option;
@@ -255,30 +315,29 @@
             });
             
             document.getElementById('p1PresetSave').addEventListener('click', async () => {
-                const tag = document.getElementById('p1Tag').value;
+                const tag = document.getElementById('p1Tag').value.trim();
                 if (!tag) { alert("Player tag cannot be empty to save a preset."); return; }
-                const preset = {
+                await addDoc(presetsColRef, {
                     tag: tag,
                     sponsor: document.getElementById('p1Sponsor').value,
                     pronouns: document.getElementById('p1Pronouns').value
-                };
-                await addDoc(presetsColRef, preset);
+                });
             });
-
             document.getElementById('p2PresetSave').addEventListener('click', async () => {
-                const tag = document.getElementById('p2Tag').value;
+                const tag = document.getElementById('p2Tag').value.trim();
                 if (!tag) { alert("Player tag cannot be empty to save a preset."); return; }
-                const preset = {
+                await addDoc(presetsColRef, {
                     tag: tag,
                     sponsor: document.getElementById('p2Sponsor').value,
                     pronouns: document.getElementById('p2Pronouns').value
-                };
-                await addDoc(presetsColRef, preset);
+                });
             });
             
-            document.getElementById('p1Preset').addEventListener('change', async (e) => {
-                if (!e.target.value || e.target.value === 'Load Preset...') return;
-                const docSnap = await getDoc(doc(presetsColRef, e.target.value));
+            // NEW: Load buttons instead of automatic change
+            document.getElementById('p1PresetLoad').addEventListener('click', async () => {
+                const id = document.getElementById('p1Preset').value;
+                if (!id) return;
+                const docSnap = await getDoc(doc(presetsColRef, id));
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     document.getElementById('p1Sponsor').value = data.sponsor;
@@ -287,10 +346,10 @@
                     saveData();
                 }
             });
-
-            document.getElementById('p2Preset').addEventListener('change', async (e) => {
-                if (!e.target.value || e.target.value === 'Load Preset...') return;
-                const docSnap = await getDoc(doc(presetsColRef, e.target.value));
+            document.getElementById('p2PresetLoad').addEventListener('click', async () => {
+                const id = document.getElementById('p2Preset').value;
+                if (!id) return;
+                const docSnap = await getDoc(doc(presetsColRef, id));
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     document.getElementById('p2Sponsor').value = data.sponsor;
@@ -302,12 +361,12 @@
 
             document.getElementById('p1PresetDelete').addEventListener('click', async () => {
                 const id = document.getElementById('p1Preset').value;
-                if (!id || id === 'Load Preset...') return;
+                if (!id) return;
                 await deleteDoc(doc(presetsColRef, id));
             });
             document.getElementById('p2PresetDelete').addEventListener('click', async () => {
                 const id = document.getElementById('p2Preset').value;
-                if (!id || id === 'Load Preset...') return;
+                if (!id) return;
                 await deleteDoc(doc(presetsColRef, id));
             });
         };
