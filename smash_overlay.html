@@ -13,7 +13,6 @@
             overflow: hidden;
             width: 1920px;
             height: 1080px;
-            /* Default to OSU Theme font */
             font-family: 'Roboto Slab', serif;
         }
 
@@ -79,7 +78,7 @@
         }
         
         /* --- REMIX THEME --- */
-        [data-theme="remix"] { background: url('https://i.imgur.com/8Q2yq4J.jpg') no-repeat center center; background-size: cover;}
+        /* REMOVED the broken background image */
         [data-theme="remix"] .player-tag-text {
             font-family: 'Anton', sans-serif;
             font-size: 2.5rem;
@@ -100,6 +99,13 @@
             color: #6FFFB0;
             font-family: 'Anton', sans-serif;
         }
+         /* NEW styles for Remix theme status text */
+        [data-theme="remix"] .score-box .secondary-text {
+            color: white;
+            font-family: 'Anton', sans-serif;
+            font-size: 0.9rem;
+            text-shadow: none;
+        }
         [data-theme="remix"] .p1-bar, [data-theme="remix"] .p2-bar {
             background-color: rgba(26, 32, 44, 0.8);
             backdrop-filter: blur(5px);
@@ -109,12 +115,11 @@
         [data-theme="remix"] .center-logo {
             width: 120px; height: 120px;
             border-radius: 50%; border: 4px solid white;
-            /* UPDATED LOGO URL */
             background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/STRLogo.png');
-            background-size: contain; /* Use 'contain' to ensure the whole logo is visible */
+            background-size: contain; 
             background-position: center;
             background-repeat: no-repeat;
-            background-color: #1a202c; /* Added a dark bg to the circle */
+            background-color: #1a202c;
         }
         [data-theme="remix"] .match-info-box {
             background-color: #6FFFB0; color: #1A202C;
@@ -123,14 +128,14 @@
         }
     </style>
 </head>
-<body class="flex items-start justify-center pt-8" data-theme="osu"> <!-- Default to OSU -->
+<body class="flex items-start justify-center pt-8" data-theme="osu"> 
 
     <div class="w-[1200px] h-[120px] flex items-center justify-between relative">
         <!-- Player 1 -->
         <div class="h-full flex items-center">
             <div id="p1ScoreBox" class="score-box p1-score-box flex flex-col items-center justify-center">
                 <span id="p1Score" class="text-4xl leading-none">0</span>
-                <span id="p1Status" class="text-black text-xs -mt-1" style="text-shadow: none;"></span>
+                <span id="p1Status" class="secondary-text text-black text-xs -mt-1" style="text-shadow: none;"></span>
             </div>
             <div class="p1-bar h-[70px] flex items-center justify-center pr-4" style="width: 450px;">
                 <div class="flex flex-col items-center text-center overflow-hidden w-[350px]">
@@ -158,7 +163,7 @@
             </div>
             <div id="p2ScoreBox" class="score-box p2-score-box flex flex-col items-center justify-center">
                 <span id="p2Score" class="text-4xl leading-none">0</span>
-                <span id="p2Status" class="text-black text-xs -mt-1" style="text-shadow: none;"></span>
+                <span id="p2Status" class="secondary-text text-black text-xs -mt-1" style="text-shadow: none;"></span>
             </div>
         </div>
 
@@ -193,7 +198,6 @@
         let currentData = {};
 
         const updateUIText = (data) => {
-            // THEME SWITCHER
             document.body.dataset.theme = data.theme || 'osu';
 
             if (data.p1Score > (currentData.p1Score || 0)) animateScore('p1Score');
