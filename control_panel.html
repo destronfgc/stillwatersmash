@@ -84,6 +84,14 @@
         <!-- Match Info Column -->
         <div class="card p-6 flex flex-col gap-4">
             <h2 class="text-xl font-bold font-['Oswald'] text-white">Match Info</h2>
+            <!-- NEW THEME SELECTOR -->
+            <div>
+                <label for="theme" class="block mb-1 text-sm font-bold">Theme</label>
+                <select id="theme" class="input-field">
+                    <option value="osu">OSU Theme</option>
+                    <option value="remix">Remix Theme</option>
+                </select>
+            </div>
             <input id="round" class="input-field" placeholder="Round">
             <div class="flex items-center gap-2">
                 <select id="formatPrefix" class="input-field w-1/2">
@@ -202,7 +210,8 @@
                 p2Score: parseInt(document.getElementById('p2Score').value, 10), p2Character: document.getElementById('p2Character').value,
                 p2Alt: parseInt(document.getElementById('p2Alt').value, 10),
                 round: document.getElementById('round').value, formatPrefix: document.getElementById('formatPrefix').value,
-                formatNumber: document.getElementById('formatNumber').value
+                formatNumber: document.getElementById('formatNumber').value,
+                theme: document.getElementById('theme').value // Save the selected theme
             };
             try {
                 await setDoc(docRef, data);
@@ -216,12 +225,10 @@
             const p1StatusInput = document.getElementById('p1Status');
             const p2StatusInput = document.getElementById('p2Status');
 
-            // Grand/True Finals takes highest priority.
             if (roundText.includes('grand') || roundText.includes('true')) {
                 p1StatusInput.value = 'Winners';
                 p2StatusInput.value = 'Losers';
             } 
-            // Next, check for specific keywords.
             else if (roundText.includes('losers')) {
                 p1StatusInput.value = 'Losers';
                 p2StatusInput.value = 'Losers';
@@ -230,12 +237,10 @@
                 p1StatusInput.value = 'Winners';
                 p2StatusInput.value = 'Winners';
             }
-            // If the round text is empty, it's winners side by default.
             else if (roundText.trim() === '') {
                 p1StatusInput.value = 'Winners';
                 p2StatusInput.value = 'Winners';
             }
-            // For any other text (like "Pools"), clear the status so it's hidden.
             else {
                 p1StatusInput.value = '';
                 p2StatusInput.value = '';
@@ -275,7 +280,7 @@
             document.getElementById('resetMatch').addEventListener('click', () => {
                 document.getElementById('p1Score').value = 0;
                 document.getElementById('p2Score').value = 0;
-                handleRoundChange(true); // Re-run the logic to set the correct default status
+                handleRoundChange(true);
             });
 
             document.getElementById('p1Clear').addEventListener('click', () => {
