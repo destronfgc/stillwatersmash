@@ -56,66 +56,68 @@
         .ticker-content { display: inline-block; white-space: nowrap; animation: scroll-left 20s linear infinite; }
         @keyframes scroll-left { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
-        /* --- UPDATED: VS SCREEN STYLES --- */
+        /* --- UPDATED: VS SCREEN & SCOREBOARD ANIMATIONS --- */
+        #scoreboard-container {
+            transition: transform 0.5s ease-in-out;
+        }
+        #scoreboard-container.hidden {
+            transform: translateY(-200px);
+        }
+
         #vs-screen {
             position: absolute;
             top: 0; left: 0;
             width: 1920px; height: 1080px;
-            background-color: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
+            /* Transparent background, no blur */
+            background-color: transparent;
             z-index: 100;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.5s ease-in-out;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            transition: opacity 0.3s ease-in-out;
         }
         #vs-screen.visible { opacity: 1; pointer-events: auto; }
 
         .vs-player-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-            animation: fade-in-up 0.8s forwards;
+            position: absolute;
+            bottom: 120px; /* Aligns with in-game UI */
+            opacity: 0;
         }
-        #vs-player1-card { animation-delay: 0.2s; opacity: 0;}
-        #vs-player2-card { animation-delay: 0.4s; opacity: 0;}
+        #vs-player1-card { 
+            left: 280px;
+            text-align: left;
+            animation: slide-in-vs 0.5s 0.2s forwards;
+        }
+        #vs-player2-card { 
+            right: 280px;
+            text-align: right;
+            animation: slide-in-vs 0.5s 0.4s forwards;
+        }
         
         .vs-player-tag {
             font-family: 'Oswald', sans-serif;
-            font-size: 6rem;
-            text-shadow: 0 0 15px black;
+            font-size: 4rem;
+            text-shadow: 0 0 10px black, 0 0 15px black;
         }
         .vs-player-sponsor {
             font-family: 'Roboto Slab', serif;
-            font-size: 3rem;
+            font-size: 2rem;
             opacity: 0.8;
-            text-shadow: 0 0 10px black;
+            text-shadow: 0 0 8px black;
         }
         [data-theme="osu"] #vs-player1-card .vs-player-tag { color: #FF7300; }
         [data-theme="osu"] #vs-player2-card .vs-player-tag { color: #cccccc; }
-        [data-theme="remix"] .vs-player-tag { color: #6FFFB0; text-shadow: 0 0 15px black; }
+        [data-theme="remix"] .vs-player-tag { color: #6FFFB0; }
         [data-theme="remix"] .vs-player-sponsor { font-family: 'Lobster', cursive; color: white; }
 
-        #vs-text {
-            font-family: 'Anton', sans-serif;
-            font-size: 10rem;
-            margin: 0 4rem;
-            opacity: 0;
-            animation: fade-in-zoom 0.8s 0.6s forwards;
+        @keyframes slide-in-vs { 
+            0% { opacity: 0; transform: translateY(50px); } 
+            100% { opacity: 1; transform: translateY(0); } 
         }
-        [data-theme="osu"] #vs-text { color: white; text-shadow: 0 0 20px #FF7300; }
-        [data-theme="remix"] #vs-text { color: #6FFFB0; text-shadow: 0 0 20px white; }
-
-        @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(50px); } 100% { opacity: 1; transform: translateY(0); } }
-        @keyframes fade-in-zoom { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body class="flex items-start justify-center pt-8" data-theme="osu"> 
 
-    <div class="w-[1200px] h-[120px] flex items-center justify-between relative">
+    <div id="scoreboard-container" class="w-[1200px] h-[120px] flex items-center justify-between relative">
         <!-- Main Overlay Content -->
         <!-- Player 1 -->
         <div class="h-full flex items-center">
@@ -183,13 +185,12 @@
         </div>
     </div>
     
-    <!-- UPDATED VS SCREEN ELEMENT -->
+    <!-- UPDATED VS SCREEN ELEMENT (no more VS text) -->
     <div id="vs-screen">
         <div id="vs-player1-card" class="vs-player-card">
             <div id="vs-p1-sponsor" class="vs-player-sponsor"></div>
             <div id="vs-p1-tag" class="vs-player-tag"></div>
         </div>
-        <div id="vs-text">VS</div>
         <div id="vs-player2-card" class="vs-player-card">
             <div id="vs-p2-sponsor" class="vs-player-sponsor"></div>
             <div id="vs-p2-tag" class="vs-player-tag"></div>
@@ -215,7 +216,6 @@
                     return name.replace(/\./g, '').replace(/ /g, '');
             }
         };
-
         const stockIconBaseUrl = "https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/stockicons/";
         let currentData = {};
         let vsScreenActive = false;
@@ -320,22 +320,28 @@
             if (vsScreenActive) return;
             vsScreenActive = true;
 
-            // Populate VS screen with data
+            const scoreboard = document.getElementById('scoreboard-container');
+            const vsScreen = document.getElementById('vs-screen');
+
+            // 1. Hide scoreboard
+            scoreboard.classList.add('hidden');
+
+            // 2. Populate and show VS screen
             document.getElementById('vs-p1-sponsor').textContent = data.p1Sponsor || '';
             document.getElementById('vs-p1-tag').textContent = data.p1Tag || 'Player 1';
             document.getElementById('vs-p2-sponsor').textContent = data.p2Sponsor || '';
             document.getElementById('vs-p2-tag').textContent = data.p2Tag || 'Player 2';
-            
-            // Show the screen
-            const vsScreen = document.getElementById('vs-screen');
             vsScreen.classList.add('visible');
 
-            // Hide the screen after a delay
+            // 3. Hide VS screen after a delay
             setTimeout(() => {
                 vsScreen.classList.remove('visible');
+                // 4. Show scoreboard again
+                scoreboard.classList.remove('hidden');
+                
                 updateDoc(docRef, { showVsScreen: false });
                 vsScreenActive = false;
-            }, 6000); // Show for 6 seconds
+            }, 5000); // Total duration is now 5 seconds
         };
 
 
