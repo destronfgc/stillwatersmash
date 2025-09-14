@@ -56,7 +56,7 @@
         .ticker-content { display: inline-block; white-space: nowrap; animation: scroll-left 20s linear infinite; }
         @keyframes scroll-left { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
-        /* --- NEW: VS SCREEN STYLES --- */
+        /* --- UPDATED: VS SCREEN STYLES --- */
         #vs-screen {
             position: absolute;
             top: 0; left: 0;
@@ -67,56 +67,50 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.5s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         #vs-screen.visible { opacity: 1; pointer-events: auto; }
 
-        .vs-player { position: absolute; top: 50%; transform: translateY(-50%); }
-        #vs-player1 { left: 100px; animation: slide-in-left 0.8s forwards; }
-        #vs-player2 { right: 100px; animation: slide-in-right 0.8s forwards; }
+        .vs-player-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            animation: fade-in-up 0.8s forwards;
+        }
+        #vs-player1-card { animation-delay: 0.2s; opacity: 0;}
+        #vs-player2-card { animation-delay: 0.4s; opacity: 0;}
         
-        .vs-char-render {
-            height: 800px;
-            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
-        }
-        #vs-player2 .vs-char-render { transform: scaleX(-1); } /* Flip P2 render */
-
-        .vs-player-info {
-            position: absolute;
-            bottom: -50px;
-            width: 100%;
-            text-align: center;
-        }
         .vs-player-tag {
             font-family: 'Oswald', sans-serif;
-            font-size: 5rem;
+            font-size: 6rem;
             text-shadow: 0 0 15px black;
         }
         .vs-player-sponsor {
             font-family: 'Roboto Slab', serif;
-            font-size: 2.5rem;
+            font-size: 3rem;
             opacity: 0.8;
             text-shadow: 0 0 10px black;
         }
-        [data-theme="osu"] #vs-player1 .vs-player-tag { color: #FF7300; }
-        [data-theme="osu"] #vs-player2 .vs-player-tag { color: #cccccc; }
-        [data-theme="remix"] #vs-player1 .vs-player-tag { color: #6FFFB0; }
-        [data-theme="remix"] #vs-player2 .vs-player-tag { color: #6FFFB0; }
+        [data-theme="osu"] #vs-player1-card .vs-player-tag { color: #FF7300; }
+        [data-theme="osu"] #vs-player2-card .vs-player-tag { color: #cccccc; }
+        [data-theme="remix"] .vs-player-tag { color: #6FFFB0; text-shadow: 0 0 15px black; }
+        [data-theme="remix"] .vs-player-sponsor { font-family: 'Lobster', cursive; color: white; }
 
         #vs-text {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(1.5);
             font-family: 'Anton', sans-serif;
-            font-size: 15rem;
+            font-size: 10rem;
+            margin: 0 4rem;
             opacity: 0;
-            animation: fade-in-zoom 0.8s 0.4s forwards;
+            animation: fade-in-zoom 0.8s 0.6s forwards;
         }
         [data-theme="osu"] #vs-text { color: white; text-shadow: 0 0 20px #FF7300; }
         [data-theme="remix"] #vs-text { color: #6FFFB0; text-shadow: 0 0 20px white; }
 
-        @keyframes slide-in-left { 0% { transform: translate(-100vw, -50%); } 100% { transform: translate(0, -50%); } }
-        @keyframes slide-in-right { 0% { transform: translate(100vw, -50%); } 100% { transform: translate(0, -50%); } }
-        @keyframes fade-in-zoom { 0% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+        @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(50px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes fade-in-zoom { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body class="flex items-start justify-center pt-8" data-theme="osu"> 
@@ -189,22 +183,16 @@
         </div>
     </div>
     
-    <!-- NEW: VS SCREEN ELEMENT -->
+    <!-- UPDATED VS SCREEN ELEMENT -->
     <div id="vs-screen">
-        <div id="vs-player1" class="vs-player">
-            <img id="vs-p1-char" src="" class="vs-char-render">
-            <div class="vs-player-info">
-                <div id="vs-p1-sponsor" class="vs-player-sponsor"></div>
-                <div id="vs-p1-tag" class="vs-player-tag"></div>
-            </div>
+        <div id="vs-player1-card" class="vs-player-card">
+            <div id="vs-p1-sponsor" class="vs-player-sponsor"></div>
+            <div id="vs-p1-tag" class="vs-player-tag"></div>
         </div>
         <div id="vs-text">VS</div>
-        <div id="vs-player2" class="vs-player">
-            <img id="vs-p2-char" src="" class="vs-char-render">
-             <div class="vs-player-info">
-                <div id="vs-p2-sponsor" class="vs-player-sponsor"></div>
-                <div id="vs-p2-tag" class="vs-player-tag"></div>
-            </div>
+        <div id="vs-player2-card" class="vs-player-card">
+            <div id="vs-p2-sponsor" class="vs-player-sponsor"></div>
+            <div id="vs-p2-tag" class="vs-player-tag"></div>
         </div>
     </div>
 
@@ -227,9 +215,6 @@
                     return name.replace(/\./g, '').replace(/ /g, '');
             }
         };
-        // NEW: Mapping for full character renders
-        const characterRenders = { "Mario": "mario", "Donkey Kong": "donkey_kong", "Link": "link", "Samus": "samus", "Dark Samus": "dark_samus", "Yoshi": "yoshi", "Kirby": "kirby", "Fox": "fox", "Pikachu": "pikachu", "Luigi": "luigi", "Ness": "ness", "Captain Falcon": "captain_falcon", "Jigglypuff": "jigglypuff", "Peach": "peach", "Daisy": "daisy", "Bowser": "bowser", "Ice Climbers": "ice_climbers", "Sheik": "sheik", "Zelda": "zelda", "Dr. Mario": "dr_mario", "Pichu": "pichu", "Falco": "falco", "Marth": "marth", "Lucina": "lucina", "Young Link": "young_link", "Ganondorf": "ganondorf", "Mewtwo": "mewtwo", "Roy": "roy", "Chrom": "chrom", "Mr. Game & Watch": "mr_game_watch", "Meta Knight": "meta_knight", "Pit": "pit", "Dark Pit": "dark_pit", "Zero Suit Samus": "zero_suit_samus", "Wario": "wario", "Snake": "snake", "Ike": "ike", "Pokemon Trainer": "pokemon_trainer", "Diddy Kong": "diddy_kong", "Lucas": "lucas", "Sonic": "sonic", "King Dedede": "king_dedede", "Olimar": "olimar", "Lucario": "lucario", "R.O.B.": "rob", "Toon Link": "toon_link", "Wolf": "wolf", "Villager": "villager", "Mega Man": "mega_man", "Wii Fit Trainer": "wii_fit_trainer", "Rosalina & Luma": "rosalina_and_luma", "Little Mac": "little_mac", "Greninja": "greninja", "Mii Brawler": "mii_brawler", "Mii Swordfighter": "mii_swordfighter", "Mii Gunner": "mii_gunner", "Palutena": "palutena", "Pac-Man": "pac_man", "Robin": "robin", "Shulk": "shulk", "Bowser Jr.": "bowser_jr", "Duck Hunt": "duck_hunt", "Ryu": "ryu", "Ken": "ken", "Cloud": "cloud", "Corrin": "corrin", "Bayonetta": "bayonetta", "Inkling": "inkling", "Ridley": "ridley", "Simon": "simon", "Richter": "richter", "King K. Rool": "king_k_rool", "Isabelle": "isabelle", "Incineroar": "incineroar", "Piranha Plant": "piranha_plant", "Joker": "joker", "Hero": "hero", "Banjo & Kazooie": "banjo_and_kazooie", "Terry": "terry", "Byleth": "byleth", "Min Min": "min_min", "Steve": "steve", "Sephiroth": "sephiroth", "Pyra and Mythra": "pyra_mythra", "Kazuya": "kazuya", "Sora": "sora" };
-        const renderBaseUrl = "https://www.smashbros.com/assets_v2/img/fighter/";
 
         const stockIconBaseUrl = "https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/stockicons/";
         let currentData = {};
@@ -331,31 +316,23 @@
             }, 50);
         };
         
-        // --- NEW: VS SCREEN LOGIC ---
         const triggerVsScreen = async (data, docRef) => {
             if (vsScreenActive) return;
             vsScreenActive = true;
 
-            // 1. Populate VS screen with data
-            const p1RenderSlug = characterRenders[data.p1Character];
-            const p2RenderSlug = characterRenders[data.p2Character];
-            
-            document.getElementById('vs-p1-char').src = p1RenderSlug ? `${renderBaseUrl}${p1RenderSlug}/main.png` : '';
-            document.getElementById('vs-p2-char').src = p2RenderSlug ? `${renderBaseUrl}${p2RenderSlug}/main.png` : '';
-
+            // Populate VS screen with data
             document.getElementById('vs-p1-sponsor').textContent = data.p1Sponsor || '';
             document.getElementById('vs-p1-tag').textContent = data.p1Tag || 'Player 1';
             document.getElementById('vs-p2-sponsor').textContent = data.p2Sponsor || '';
             document.getElementById('vs-p2-tag').textContent = data.p2Tag || 'Player 2';
             
-            // 2. Show the screen
+            // Show the screen
             const vsScreen = document.getElementById('vs-screen');
             vsScreen.classList.add('visible');
 
-            // 3. Hide the screen after a delay
+            // Hide the screen after a delay
             setTimeout(() => {
                 vsScreen.classList.remove('visible');
-                // Reset the trigger in the database
                 updateDoc(docRef, { showVsScreen: false });
                 vsScreenActive = false;
             }, 6000); // Show for 6 seconds
@@ -377,7 +354,6 @@
                     adjustPlayerFontSize('p1');
                     adjustPlayerFontSize('p2');
 
-                    // Check for the VS screen trigger
                     if (data.showVsScreen && !vsScreenActive) {
                         triggerVsScreen(data, docRef);
                     }
