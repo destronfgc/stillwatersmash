@@ -39,6 +39,9 @@
         .btn-secondary:hover { background-color: #2D3748; }
         .btn-danger { background-color: #9B2C2C; color: white; }
         .btn-danger:hover { background-color: #742A2A; }
+        .btn-toggle.active {
+            background-color: #2C7A7B;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -53,7 +56,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Player 1 Column -->
         <div class="card p-6 flex flex-col gap-4">
-            <div class="flex justify-between items-center">
+             <div class="flex justify-between items-center">
                  <h2 class="text-xl font-bold font-['Oswald'] text-[#FF7300]">Player 1</h2>
                  <button id="p1Clear" class="btn btn-secondary text-xs py-1 px-3">Clear</button>
             </div>
@@ -84,7 +87,6 @@
         <!-- Match Info Column -->
         <div class="card p-6 flex flex-col gap-4">
             <h2 class="text-xl font-bold font-['Oswald'] text-white">Match Info</h2>
-            <!-- NEW THEME SELECTOR -->
             <div>
                 <label for="theme" class="block mb-1 text-sm font-bold">Theme</label>
                 <select id="theme" class="input-field">
@@ -103,11 +105,15 @@
             <button id="swapPlayers" class="btn btn-secondary">Swap Players</button>
             <button id="resetMatch" class="btn btn-danger">Reset Match</button>
             <button id="forceUpdate" class="btn btn-primary">Force Update</button>
+            <div class="pt-4 border-t border-gray-700 flex flex-col gap-2">
+                 <button id="toggleCommentators" class="btn btn-secondary btn-toggle">Show Commentators</button>
+                 <button id="toggleTicker" class="btn btn-secondary btn-toggle">Show Ticker</button>
+            </div>
         </div>
 
         <!-- Player 2 Column -->
         <div class="card p-6 flex flex-col gap-4">
-            <div class="flex justify-between items-center">
+             <div class="flex justify-between items-center">
                  <h2 class="text-xl font-bold font-['Oswald'] text-[#FF7300]">Player 2</h2>
                  <button id="p2Clear" class="btn btn-secondary text-xs py-1 px-3">Clear</button>
             </div>
@@ -135,6 +141,28 @@
             </div>
         </div>
     </div>
+    
+    <!-- NEW ROW FOR STREAM EXTRAS -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        <div class="card p-6 lg:col-span-2">
+             <h2 class="text-xl font-bold font-['Oswald'] text-white mb-4">Commentators</h2>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <input id="commentator1Name" class="input-field" placeholder="Commentator 1 Name">
+                    <input id="commentator1Social" class="input-field mt-2" placeholder="@social1">
+                </div>
+                <div>
+                    <input id="commentator2Name" class="input-field" placeholder="Commentator 2 Name">
+                    <input id="commentator2Social" class="input-field mt-2" placeholder="@social2">
+                </div>
+             </div>
+        </div>
+        <div class="card p-6">
+            <h2 class="text-xl font-bold font-['Oswald'] text-white mb-4">Upcoming Match Ticker</h2>
+            <input id="tickerText" class="input-field" placeholder="Up next: Player A vs Player B">
+        </div>
+    </div>
+
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -166,6 +194,10 @@
         const statusText = document.getElementById('status-text');
         let db, auth, docRef, presetsColRef;
         const appId = 'stillwater-smash-overlay';
+        
+        // State variables for toggles
+        let showCommentators = false;
+        let showTicker = false;
 
         const main = async () => {
             try {
@@ -195,6 +227,10 @@
                     const el = document.getElementById(key);
                     if (el) el.value = data[key];
                 });
+                // Load toggle states
+                showCommentators = data.showCommentators || false;
+                showTicker = data.showTicker || false;
+                updateToggleButtons();
             }
             handleRoundChange(false);
         };
@@ -211,7 +247,15 @@
                 p2Alt: parseInt(document.getElementById('p2Alt').value, 10),
                 round: document.getElementById('round').value, formatPrefix: document.getElementById('formatPrefix').value,
                 formatNumber: document.getElementById('formatNumber').value,
-                theme: document.getElementById('theme').value // Save the selected theme
+                theme: document.getElementById('theme').value,
+                // New fields
+                commentator1Name: document.getElementById('commentator1Name').value,
+                commentator1Social: document.getElementById('commentator1Social').value,
+                commentator2Name: document.getElementById('commentator2Name').value,
+                commentator2Social: document.getElementById('commentator2Social').value,
+                tickerText: document.getElementById('tickerText').value,
+                showCommentators: showCommentators,
+                showTicker: showTicker
             };
             try {
                 await setDoc(docRef, data);
@@ -233,11 +277,7 @@
                 p1StatusInput.value = 'Losers';
                 p2StatusInput.value = 'Losers';
             } 
-            else if (roundText.includes('winners')) {
-                p1StatusInput.value = 'Winners';
-                p2StatusInput.value = 'Winners';
-            }
-            else if (roundText.trim() === '') {
+            else if (roundText.includes('winners') || roundText.trim() === '') {
                 p1StatusInput.value = 'Winners';
                 p2StatusInput.value = 'Winners';
             }
@@ -251,6 +291,15 @@
             }
         };
 
+        const updateToggleButtons = () => {
+            const commsBtn = document.getElementById('toggleCommentators');
+            const tickerBtn = document.getElementById('toggleTicker');
+            commsBtn.textContent = showCommentators ? 'Hide Commentators' : 'Show Commentators';
+            tickerBtn.textContent = showTicker ? 'Hide Ticker' : 'Show Ticker';
+            commsBtn.classList.toggle('active', showCommentators);
+            tickerBtn.classList.toggle('active', showTicker);
+        };
+
         const setupListeners = () => {
             document.querySelectorAll('input, select').forEach(el => {
                 if (el.id !== 'round') {
@@ -259,12 +308,10 @@
             });
             document.getElementById('round').addEventListener('input', () => handleRoundChange(true));
             document.getElementById('forceUpdate').addEventListener('click', saveData);
-
             document.getElementById('p1ScorePlus').addEventListener('click', () => { document.getElementById('p1Score').value++; saveData(); });
             document.getElementById('p1ScoreMinus').addEventListener('click', () => { document.getElementById('p1Score').value--; saveData(); });
             document.getElementById('p2ScorePlus').addEventListener('click', () => { document.getElementById('p2Score').value++; saveData(); });
             document.getElementById('p2ScoreMinus').addEventListener('click', () => { document.getElementById('p2Score').value--; saveData(); });
-
             document.getElementById('swapPlayers').addEventListener('click', () => {
                 const fields = ['Sponsor', 'Tag', 'Pronouns', 'Status', 'Score', 'Character', 'Alt'];
                 fields.forEach(field => {
@@ -276,13 +323,11 @@
                 });
                 saveData();
             });
-
             document.getElementById('resetMatch').addEventListener('click', () => {
                 document.getElementById('p1Score').value = 0;
                 document.getElementById('p2Score').value = 0;
                 handleRoundChange(true);
             });
-
             document.getElementById('p1Clear').addEventListener('click', () => {
                 document.getElementById('p1Sponsor').value = '';
                 document.getElementById('p1Tag').value = '';
@@ -293,6 +338,18 @@
                 document.getElementById('p2Sponsor').value = '';
                 document.getElementById('p2Tag').value = '';
                 document.getElementById('p2Pronouns').value = '';
+                saveData();
+            });
+
+            // New Toggle Listeners
+            document.getElementById('toggleCommentators').addEventListener('click', () => {
+                showCommentators = !showCommentators;
+                updateToggleButtons();
+                saveData();
+            });
+            document.getElementById('toggleTicker').addEventListener('click', () => {
+                showTicker = !showTicker;
+                updateToggleButtons();
                 saveData();
             });
         };
