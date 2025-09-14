@@ -108,6 +108,8 @@
             <div class="pt-4 border-t border-gray-700 flex flex-col gap-2">
                  <button id="toggleCommentators" class="btn btn-secondary btn-toggle">Show Commentators</button>
                  <button id="toggleTicker" class="btn btn-secondary btn-toggle">Show Ticker</button>
+                 <!-- NEW VS SCREEN BUTTON -->
+                 <button id="showVsScreen" class="btn btn-secondary bg-purple-700 hover:bg-purple-800">Show VS Screen</button>
             </div>
         </div>
 
@@ -142,7 +144,6 @@
         </div>
     </div>
     
-    <!-- NEW ROW FOR STREAM EXTRAS -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <div class="card p-6 lg:col-span-2">
              <h2 class="text-xl font-bold font-['Oswald'] text-white mb-4">Commentators</h2>
@@ -166,7 +167,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { firebaseConfig } from './firebase-config.js';
 
@@ -195,7 +196,6 @@
         let db, auth, docRef, presetsColRef;
         const appId = 'stillwater-smash-overlay';
         
-        // State variables for toggles
         let showCommentators = false;
         let showTicker = false;
 
@@ -227,7 +227,6 @@
                     const el = document.getElementById(key);
                     if (el) el.value = data[key];
                 });
-                // Load toggle states
                 showCommentators = data.showCommentators || false;
                 showTicker = data.showTicker || false;
                 updateToggleButtons();
@@ -248,17 +247,17 @@
                 round: document.getElementById('round').value, formatPrefix: document.getElementById('formatPrefix').value,
                 formatNumber: document.getElementById('formatNumber').value,
                 theme: document.getElementById('theme').value,
-                // New fields
                 commentator1Name: document.getElementById('commentator1Name').value,
                 commentator1Social: document.getElementById('commentator1Social').value,
                 commentator2Name: document.getElementById('commentator2Name').value,
                 commentator2Social: document.getElementById('commentator2Social').value,
                 tickerText: document.getElementById('tickerText').value,
                 showCommentators: showCommentators,
-                showTicker: showTicker
+                showTicker: showTicker,
+                // Don't save showVsScreen, it's a one-time trigger
             };
             try {
-                await setDoc(docRef, data);
+                await setDoc(docRef, data, { merge: true });
             } catch (error) {
                 console.error("Error saving data: ", error);
             }
@@ -303,7 +302,7 @@
         const setupListeners = () => {
             document.querySelectorAll('input, select').forEach(el => {
                 if (el.id !== 'round') {
-                    el.addEventListener('change', saveData)
+                    el.addEventListener('change', saveData);
                 }
             });
             document.getElementById('round').addEventListener('input', () => handleRoundChange(true));
@@ -340,8 +339,6 @@
                 document.getElementById('p2Pronouns').value = '';
                 saveData();
             });
-
-            // New Toggle Listeners
             document.getElementById('toggleCommentators').addEventListener('click', () => {
                 showCommentators = !showCommentators;
                 updateToggleButtons();
@@ -351,6 +348,11 @@
                 showTicker = !showTicker;
                 updateToggleButtons();
                 saveData();
+            });
+            // NEW VS SCREEN LISTENER
+            document.getElementById('showVsScreen').addEventListener('click', async () => {
+                // We use updateDoc here to send a one-time signal to the overlay
+                await updateDoc(docRef, { showVsScreen: true });
             });
         };
 
