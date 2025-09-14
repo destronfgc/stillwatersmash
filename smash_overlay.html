@@ -65,32 +65,9 @@
         [data-theme="remix"] .center-logo { width: 120px; height: 120px; border-radius: 50%; border: 4px solid white; background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/STRLogo.png'); background-size: contain; background-position: center; background-repeat: no-repeat; background-color: #1a202c; }
         [data-theme="remix"] .match-info-box { background-color: #6FFFB0; color: #1A202C; font-family: 'Anton', sans-serif; text-transform: uppercase; }
 
-        /* --- UPDATED: COMMENTATOR AND TICKER STYLES --- */
-        .lower-third {
-            position: absolute;
-            /* MOVED to top-left corner */
-            top: 150px; 
-            left: 30px;
-            display: flex;
-            /* Stack vertically */
-            flex-direction: column; 
-            gap: 1rem;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-            /* Slide in from the left */
-            transform: translateX(-100%);
-        }
-        .lower-third.visible {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        .commentator-box {
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
+        .lower-third { position: absolute; top: 150px; left: 30px; display: flex; flex-direction: column; gap: 1rem; opacity: 0; transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; transform: translateX(-100%); }
+        .lower-third.visible { opacity: 1; transform: translateX(0); }
+        .commentator-box { padding: 0.5rem 1rem; border-radius: 0.5rem; display: flex; align-items: center; gap: 0.75rem; }
         [data-theme="osu"] .commentator-box { background-color: rgba(35, 35, 35, 0.9); border: 2px solid #FF7300; }
         [data-theme="remix"] .commentator-box { background-color: rgba(26, 32, 44, 0.9); backdrop-filter: blur(5px); border: 2px solid #6FFFB0; }
         .comm-name { font-family: 'Oswald', sans-serif; font-size: 1.5rem; }
@@ -98,32 +75,13 @@
         [data-theme="remix"] .comm-name { font-family: 'Anton', sans-serif; color: white; }
         [data-theme="remix"] .comm-social { font-family: 'Lobster', cursive; color: #6FFFB0; }
         
-        .ticker {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 40px;
-            padding: 0.5rem;
-            overflow: hidden;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-        .ticker.visible {
-            opacity: 1;
-        }
+        .ticker { position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; padding: 0.5rem; overflow: hidden; opacity: 0; transition: opacity 0.5s ease-in-out; }
+        .ticker.visible { opacity: 1; }
         [data-theme="osu"] .ticker { background-color: #232323; }
         [data-theme="remix"] .ticker { background-color: #1A202C; border-top: 2px solid #6FFFB0; }
         
-        .ticker-content {
-            display: inline-block;
-            white-space: nowrap;
-            animation: scroll-left 20s linear infinite;
-        }
-        @keyframes scroll-left {
-            0% { transform: translateX(100vw); }
-            100% { transform: translateX(-100%); }
-        }
+        .ticker-content { display: inline-block; white-space: nowrap; animation: scroll-left 20s linear infinite; }
+        @keyframes scroll-left { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
     </style>
 </head>
 <body class="flex items-start justify-center pt-8" data-theme="osu"> 
@@ -136,6 +94,7 @@
                 <span id="p1Status" class="secondary-text"></span>
             </div>
             <div class="p1-bar h-[70px] flex items-center justify-center pr-4" style="width: 450px;">
+                <!-- This container is now centered and has a fixed width for accurate measurement -->
                 <div class="flex flex-col items-center text-center overflow-hidden w-[350px]">
                     <div id="p1-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
                         <span id="p1Sponsor" class="secondary-text"></span>
@@ -151,6 +110,7 @@
         <div class="h-full flex items-center">
              <div class="p2-bar h-[70px] flex items-center justify-center pl-4" style="width: 450px;">
                  <img id="p2Character" src="https://placehold.co/80x80/232323/232323?text=" class="h-[70px] w-auto mr-3">
+                 <!-- This container is now centered and has a fixed width for accurate measurement -->
                  <div class="flex flex-col items-center text-center overflow-hidden w-[350px]">
                     <div id="p2-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
                         <span id="p2Sponsor" class="secondary-text"></span>
@@ -174,7 +134,6 @@
         </div>
     </div>
     
-    <!-- NEW: COMMENTATOR AND TICKER ELEMENTS -->
     <div id="commentators" class="lower-third">
         <div id="comm1-box" class="commentator-box">
             <i class="fas fa-microphone text-2xl"></i>
@@ -222,7 +181,6 @@
 
         const updateUIText = (data) => {
             document.body.dataset.theme = data.theme || 'osu';
-
             if (data.p1Score > (currentData.p1Score || 0)) animateScore('p1Score');
             if (data.p2Score > (currentData.p2Score || 0)) animateScore('p2Score');
 
@@ -278,51 +236,44 @@
         const checkSetPoint = (data) => {
             const formatPrefix = data.formatPrefix || 'Best of';
             const formatNumber = parseInt(data.formatNumber, 10) || 5;
-            let winScore;
-
-            if (formatPrefix === 'Best of') {
-                winScore = Math.ceil(formatNumber / 2);
-            } else { // First to
-                winScore = formatNumber;
-            }
-
+            let winScore = (formatPrefix === 'Best of') ? Math.ceil(formatNumber / 2) : formatNumber;
             const p1ScoreBox = document.getElementById('p1ScoreBox');
             const p2ScoreBox = document.getElementById('p2ScoreBox');
-            
-            if (data.p1Score === winScore - 1 && winScore > 1) {
-                p1ScoreBox.classList.add('set-point');
-            } else {
-                p1ScoreBox.classList.remove('set-point');
-            }
-
-            if (data.p2Score === winScore - 1 && winScore > 1) {
-                p2ScoreBox.classList.add('set-point');
-            } else {
-                p2ScoreBox.classList.remove('set-point');
-            }
+            p1ScoreBox.classList.toggle('set-point', data.p1Score === winScore - 1 && winScore > 1);
+            p2ScoreBox.classList.toggle('set-point', data.p2Score === winScore - 1 && winScore > 1);
         };
 
         const adjustPlayerFontSize = (playerId) => {
             const container = document.getElementById(`${playerId}-name-container`);
             const sponsor = document.getElementById(`${playerId}Sponsor`);
             const tag = document.getElementById(`${playerId}Tag`);
-            const maxTagSize = document.body.dataset.theme === 'remix' ? 2.5 : 2.2;
-            const maxSponsorSize = document.body.dataset.theme === 'remix' ? 1.6 : 1.25;
-            const minTagSize = 1.4; const minSponsorSize = 0.9;
+            const theme = document.body.dataset.theme;
+            
+            // Define theme-specific font sizes
+            const maxTagSize = theme === 'remix' ? 2.5 : 2.2;
+            const maxSponsorSize = theme === 'remix' ? 1.6 : 1.25;
+            const minTagSize = 1.4; 
+            const minSponsorSize = 0.9;
             const maxWidth = 350;
 
+            // Reset styles before measuring
             tag.style.fontSize = `${maxTagSize}rem`;
             sponsor.style.fontSize = `${maxSponsorSize}rem`;
 
+            // Use a timeout to allow the browser to render the new text and max font size before we measure it
             setTimeout(() => {
                 const currentWidth = container.scrollWidth;
+                
                 if (currentWidth > maxWidth) {
-                    const scale = (maxWidth / currentWidth) * 0.98;
+                    const scale = (maxWidth / currentWidth) * 0.98; // Add a little padding
                     const newTagSize = Math.max(minTagSize, maxTagSize * scale);
                     const newSponsorSize = Math.max(minSponsorSize, maxSponsorSize * scale);
+                    
                     tag.style.fontSize = `${newTagSize}rem`;
                     sponsor.style.fontSize = `${newSponsorSize}rem`;
-                } else {
+                }
+                // This 'else' is crucial. If the name is short, it ensures the font size goes back to max.
+                else {
                     tag.style.fontSize = `${maxTagSize}rem`;
                     sponsor.style.fontSize = `${maxSponsorSize}rem`;
                 }
@@ -341,6 +292,7 @@
                 onSnapshot(docRef, (doc) => {
                     const data = doc.exists() ? doc.data() : {};
                     updateUIText(data);
+                    // Crucially, call the adjust function for EACH player independently
                     adjustPlayerFontSize('p1');
                     adjustPlayerFontSize('p2');
                 });
