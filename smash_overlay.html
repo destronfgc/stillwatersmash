@@ -6,6 +6,8 @@
     <title>Smash Bros. Ultimate OBS Overlay</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Roboto+Slab:wght@400;700&family=Anton&family=Lobster&display=swap" rel="stylesheet">
+    <!-- Font Awesome for microphone icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
             background-color: transparent;
@@ -43,96 +45,81 @@
         }
         
         /* --- OSU THEME --- */
-        [data-theme="osu"] .player-tag-text {
-            font-family: 'Oswald', sans-serif;
-            text-transform: uppercase;
-            font-size: 2.2rem;
-            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
-        }
-        [data-theme="osu"] .secondary-text {
-            font-family: 'Roboto Slab', serif;
-            text-transform: uppercase;
-            font-size: 1.25rem;
-            text-shadow: -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000;
-            color: #ffffff;
-        }
-        [data-theme="osu"] .score-box {
-            background-color: white;
-            color: #FF7300;
-            font-family: 'Oswald', sans-serif;
-        }
-        /* OSU THEME FIX: Correct font, size, and color for status text */
-        [data-theme="osu"] .score-box .secondary-text {
-            color: #232323;
-            text-shadow: none;
-            font-family: 'Oswald', sans-serif;
-            font-size: 0.75rem; /* 12px */
-            margin-top: -0.25rem;
-        }
+        [data-theme="osu"] .player-tag-text { font-family: 'Oswald', sans-serif; text-transform: uppercase; font-size: 2.2rem; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; }
+        [data-theme="osu"] .secondary-text { font-family: 'Roboto Slab', serif; text-transform: uppercase; font-size: 1.25rem; text-shadow: -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000; color: #ffffff; }
+        [data-theme="osu"] .score-box { background-color: white; color: #FF7300; font-family: 'Oswald', sans-serif; }
+        [data-theme="osu"] .score-box .secondary-text { color: #232323; text-shadow: none; font-family: 'Oswald', sans-serif; font-size: 0.75rem; margin-top: -0.25rem; }
         [data-theme="osu"] .p1-score-box { clip-path: polygon(0 0, 100% 0, 100% 100%, 25% 100%, 0 75%); }
         [data-theme="osu"] .p2-score-box { clip-path: polygon(0 0, 100% 0, 100% 75%, 75% 100%, 0 100%); }
         [data-theme="osu"] .p1-bar { background-color: #FF7300; }
         [data-theme="osu"] .p2-bar { background-color: #232323; border: 2px solid #555; }
-        [data-theme="osu"] .center-logo {
-            width: 110px; height: 110px;
-            background-color: white; border-radius: 50%; border: 8px solid #FF7300;
-            background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/shieldpokeslogo.png');
-            background-size: 115%; background-position: center; background-repeat: no-repeat;
-        }
-        [data-theme="osu"] .match-info-box {
-            background-color: white; color: #232323;
-            font-family: 'Oswald', sans-serif;
-            text-transform: uppercase;
-        }
+        [data-theme="osu"] .center-logo { width: 110px; height: 110px; background-color: white; border-radius: 50%; border: 8px solid #FF7300; background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/shieldpokeslogo.png'); background-size: 115%; background-position: center; background-repeat: no-repeat; }
+        [data-theme="osu"] .match-info-box { background-color: white; color: #232323; font-family: 'Oswald', sans-serif; text-transform: uppercase; }
         
         /* --- REMIX THEME --- */
-        [data-theme="remix"] .player-tag-text {
-            font-family: 'Anton', sans-serif;
-            font-size: 2.5rem;
-            color: white;
-            text-shadow: 0 0 8px #6FFFB0, 0 0 12px #6FFFB0;
+        [data-theme="remix"] .player-tag-text { font-family: 'Anton', sans-serif; font-size: 2.5rem; color: white; text-shadow: 0 0 8px #6FFFB0, 0 0 12px #6FFFB0; }
+        [data-theme="remix"] .secondary-text { font-family: 'Lobster', cursive; font-size: 1.6rem; color: #6FFFB0; text-shadow: 0 0 5px #000, 0 0 8px #000; }
+        [data-theme="remix"] .score-box { background-color: rgba(26, 32, 44, 0.8); backdrop-filter: blur(5px); border: 2px solid #6FFFB0; border-radius: 0.5rem; color: #6FFFB0; font-family: 'Anton', sans-serif; }
+        [data-theme="remix"] .score-box .secondary-text { color: white; font-family: 'Anton', sans-serif; font-size: 0.9rem; text-shadow: none; margin-top: -0.25rem; }
+        [data-theme="remix"] .p1-bar, [data-theme="remix"] .p2-bar { background-color: rgba(26, 32, 44, 0.8); backdrop-filter: blur(5px); border: 2px solid #6FFFB0; border-radius: 0.5rem; }
+        [data-theme="remix"] .center-logo { width: 120px; height: 120px; border-radius: 50%; border: 4px solid white; background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/STRLogo.png'); background-size: contain; background-position: center; background-repeat: no-repeat; background-color: #1a202c; }
+        [data-theme="remix"] .match-info-box { background-color: #6FFFB0; color: #1A202C; font-family: 'Anton', sans-serif; text-transform: uppercase; }
+
+        /* --- NEW: COMMENTATOR AND TICKER STYLES --- */
+        .lower-third {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 2rem;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            transform: translate(-50%, 20px);
         }
-        [data-theme="remix"] .secondary-text {
-            font-family: 'Lobster', cursive;
-            font-size: 1.6rem;
-            color: #6FFFB0;
-            text-shadow: 0 0 5px #000, 0 0 8px #000;
+        .lower-third.visible {
+            opacity: 1;
+            transform: translate(-50%, 0);
         }
-        [data-theme="remix"] .score-box {
-            background-color: rgba(26, 32, 44, 0.8);
-            backdrop-filter: blur(5px);
-            border: 2px solid #6FFFB0;
+        .commentator-box {
+            padding: 0.5rem 1rem;
             border-radius: 0.5rem;
-            color: #6FFFB0;
-            font-family: 'Anton', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
-        /* REMIX THEME: Status text styles */
-        [data-theme="remix"] .score-box .secondary-text {
-            color: white;
-            font-family: 'Anton', sans-serif;
-            font-size: 0.9rem;
-            text-shadow: none;
-            margin-top: -0.25rem;
+        [data-theme="osu"] .commentator-box { background-color: rgba(35, 35, 35, 0.9); border: 2px solid #FF7300; }
+        [data-theme="remix"] .commentator-box { background-color: rgba(26, 32, 44, 0.9); backdrop-filter: blur(5px); border: 2px solid #6FFFB0; }
+        .comm-name { font-family: 'Oswald', sans-serif; font-size: 1.5rem; }
+        .comm-social { font-family: 'Roboto Slab', serif; font-size: 1rem; opacity: 0.8; }
+        [data-theme="remix"] .comm-name { font-family: 'Anton', sans-serif; color: white; }
+        [data-theme="remix"] .comm-social { font-family: 'Lobster', cursive; color: #6FFFB0; }
+        
+        .ticker {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            padding: 0.5rem;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
-        [data-theme="remix"] .p1-bar, [data-theme="remix"] .p2-bar {
-            background-color: rgba(26, 32, 44, 0.8);
-            backdrop-filter: blur(5px);
-            border: 2px solid #6FFFB0;
-            border-radius: 0.5rem;
+        .ticker.visible {
+            opacity: 1;
         }
-        [data-theme="remix"] .center-logo {
-            width: 120px; height: 120px;
-            border-radius: 50%; border: 4px solid white;
-            background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/STRLogo.png');
-            background-size: contain; 
-            background-position: center;
-            background-repeat: no-repeat;
-            background-color: #1a202c;
+        [data-theme="osu"] .ticker { background-color: #232323; }
+        [data-theme="remix"] .ticker { background-color: #1A202C; border-top: 2px solid #6FFFB0; }
+        
+        .ticker-content {
+            display: inline-block;
+            white-space: nowrap;
+            animation: scroll-left 20s linear infinite;
         }
-        [data-theme="remix"] .match-info-box {
-            background-color: #6FFFB0; color: #1A202C;
-            font-family: 'Anton', sans-serif;
-            text-transform: uppercase;
+        @keyframes scroll-left {
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100%); }
         }
     </style>
 </head>
@@ -183,6 +170,31 @@
              </div>
         </div>
     </div>
+    
+    <!-- NEW: COMMENTATOR AND TICKER ELEMENTS -->
+    <div id="commentators" class="lower-third">
+        <div id="comm1-box" class="commentator-box">
+            <i class="fas fa-microphone text-2xl"></i>
+            <div>
+                <div id="commentator1Name" class="comm-name"></div>
+                <div id="commentator1Social" class="comm-social"></div>
+            </div>
+        </div>
+        <div id="comm2-box" class="commentator-box">
+            <i class="fas fa-microphone text-2xl"></i>
+            <div>
+                <div id="commentator2Name" class="comm-name"></div>
+                <div id="commentator2Social" class="comm-social"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="ticker" class="ticker">
+        <div class="ticker-content text-2xl font-['Oswald']">
+            <span id="tickerText"></span>
+        </div>
+    </div>
+
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -214,21 +226,17 @@
             document.getElementById('p1Sponsor').textContent = data.p1Sponsor || '';
             document.getElementById('p1Tag').textContent = data.p1Tag || 'Player 1';
             document.getElementById('p1Pronouns').textContent = data.p1Pronouns || '';
-            
             const p1StatusEl = document.getElementById('p1Status');
             p1StatusEl.textContent = data.p1Status || '';
             p1StatusEl.style.visibility = data.p1Status ? 'visible' : 'hidden';
-            
             document.getElementById('p1Score').textContent = data.p1Score ?? 0;
 
             document.getElementById('p2Sponsor').textContent = data.p2Sponsor || '';
             document.getElementById('p2Tag').textContent = data.p2Tag || 'Player 2';
             document.getElementById('p2Pronouns').textContent = data.p2Pronouns || '';
-            
             const p2StatusEl = document.getElementById('p2Status');
             p2StatusEl.textContent = data.p2Status || '';
             p2StatusEl.style.visibility = data.p2Status ? 'visible' : 'hidden';
-
             document.getElementById('p2Score').textContent = data.p2Score ?? 0;
             
             document.getElementById('round').textContent = data.round || 'Grand Finals';
@@ -242,6 +250,21 @@
             const p2Alt = data.p2Alt || 1;
             document.getElementById('p2Character').src = p2CharFile ? `${stockIconBaseUrl}${p2CharFile}${p2Alt}.png` : 'https://placehold.co/80x80/232323/232323?text=';
             
+            // NEW: Update commentators and ticker
+            document.getElementById('commentator1Name').textContent = data.commentator1Name || '';
+            document.getElementById('commentator1Social').textContent = data.commentator1Social || '';
+            document.getElementById('commentator2Name').textContent = data.commentator2Name || '';
+            document.getElementById('commentator2Social').textContent = data.commentator2Social || '';
+            document.getElementById('tickerText').textContent = data.tickerText || '';
+
+            // Hide individual commentator boxes if their names are empty
+            document.getElementById('comm1-box').style.display = data.commentator1Name ? 'flex' : 'none';
+            document.getElementById('comm2-box').style.display = data.commentator2Name ? 'flex' : 'none';
+
+            // Show/Hide main containers
+            document.getElementById('commentators').classList.toggle('visible', data.showCommentators);
+            document.getElementById('ticker').classList.toggle('visible', data.showTicker);
+
             checkSetPoint(data);
             currentData = data;
         };
