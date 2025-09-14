@@ -6,43 +6,16 @@
     <title>Smash Bros. Ultimate OBS Overlay</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Roboto+Slab:wght@400;700&family=Anton&family=Lobster&display=swap" rel="stylesheet">
-    <!-- Font Awesome for microphone icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body {
-            background-color: transparent;
-            color: white;
-            overflow: hidden;
-            width: 1920px;
-            height: 1080px;
-            font-family: 'Roboto Slab', serif;
-        }
+        body { background-color: transparent; color: white; overflow: hidden; width: 1920px; height: 1080px; font-family: 'Roboto Slab', serif; }
 
         /* --- SHARED STYLES --- */
-        .score-box {
-            font-weight: 700;
-            width: 80px;
-            height: 80px;
-            transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
-        }
-
-        @keyframes score-update-pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.25); color: #FFF700; }
-            100% { transform: scale(1); }
-        }
-        .score-updated {
-            animation: score-update-pulse 0.4s ease-in-out;
-        }
-
-        @keyframes set-point-glow {
-            0% { box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700; }
-            50% { box-shadow: 0 0 25px #FFD700, 0 0 40px #FFD700; }
-            100% { box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700; }
-        }
-        .set-point {
-            animation: set-point-glow 1.5s infinite;
-        }
+        .score-box { font-weight: 700; width: 80px; height: 80px; transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out; }
+        @keyframes score-update-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.25); color: #FFF700; } 100% { transform: scale(1); } }
+        .score-updated { animation: score-update-pulse 0.4s ease-in-out; }
+        @keyframes set-point-glow { 0% { box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700; } 50% { box-shadow: 0 0 25px #FFD700, 0 0 40px #FFD700; } 100% { box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700; } }
+        .set-point { animation: set-point-glow 1.5s infinite; }
         
         /* --- OSU THEME --- */
         [data-theme="osu"] .player-tag-text { font-family: 'Oswald', sans-serif; text-transform: uppercase; font-size: 2.2rem; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; }
@@ -82,11 +55,74 @@
         
         .ticker-content { display: inline-block; white-space: nowrap; animation: scroll-left 20s linear infinite; }
         @keyframes scroll-left { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
+
+        /* --- NEW: VS SCREEN STYLES --- */
+        #vs-screen {
+            position: absolute;
+            top: 0; left: 0;
+            width: 1920px; height: 1080px;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #vs-screen.visible { opacity: 1; pointer-events: auto; }
+
+        .vs-player { position: absolute; top: 50%; transform: translateY(-50%); }
+        #vs-player1 { left: 100px; animation: slide-in-left 0.8s forwards; }
+        #vs-player2 { right: 100px; animation: slide-in-right 0.8s forwards; }
+        
+        .vs-char-render {
+            height: 800px;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+        }
+        #vs-player2 .vs-char-render { transform: scaleX(-1); } /* Flip P2 render */
+
+        .vs-player-info {
+            position: absolute;
+            bottom: -50px;
+            width: 100%;
+            text-align: center;
+        }
+        .vs-player-tag {
+            font-family: 'Oswald', sans-serif;
+            font-size: 5rem;
+            text-shadow: 0 0 15px black;
+        }
+        .vs-player-sponsor {
+            font-family: 'Roboto Slab', serif;
+            font-size: 2.5rem;
+            opacity: 0.8;
+            text-shadow: 0 0 10px black;
+        }
+        [data-theme="osu"] #vs-player1 .vs-player-tag { color: #FF7300; }
+        [data-theme="osu"] #vs-player2 .vs-player-tag { color: #cccccc; }
+        [data-theme="remix"] #vs-player1 .vs-player-tag { color: #6FFFB0; }
+        [data-theme="remix"] #vs-player2 .vs-player-tag { color: #6FFFB0; }
+
+        #vs-text {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(1.5);
+            font-family: 'Anton', sans-serif;
+            font-size: 15rem;
+            opacity: 0;
+            animation: fade-in-zoom 0.8s 0.4s forwards;
+        }
+        [data-theme="osu"] #vs-text { color: white; text-shadow: 0 0 20px #FF7300; }
+        [data-theme="remix"] #vs-text { color: #6FFFB0; text-shadow: 0 0 20px white; }
+
+        @keyframes slide-in-left { 0% { transform: translate(-100vw, -50%); } 100% { transform: translate(0, -50%); } }
+        @keyframes slide-in-right { 0% { transform: translate(100vw, -50%); } 100% { transform: translate(0, -50%); } }
+        @keyframes fade-in-zoom { 0% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
     </style>
 </head>
 <body class="flex items-start justify-center pt-8" data-theme="osu"> 
 
     <div class="w-[1200px] h-[120px] flex items-center justify-between relative">
+        <!-- Main Overlay Content -->
         <!-- Player 1 -->
         <div class="h-full flex items-center">
             <div id="p1ScoreBox" class="score-box p1-score-box flex flex-col items-center justify-center">
@@ -94,7 +130,6 @@
                 <span id="p1Status" class="secondary-text"></span>
             </div>
             <div class="p1-bar h-[70px] flex items-center justify-center pr-4" style="width: 450px;">
-                <!-- This container is now centered and has a fixed width for accurate measurement -->
                 <div class="flex flex-col items-center text-center overflow-hidden w-[350px]">
                     <div id="p1-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
                         <span id="p1Sponsor" class="secondary-text"></span>
@@ -105,12 +140,10 @@
                 <img id="p1Character" src="https://placehold.co/80x80/FF7300/FF7300?text=" class="h-[70px] w-auto ml-3">
             </div>
         </div>
-        
         <!-- Player 2 -->
         <div class="h-full flex items-center">
              <div class="p2-bar h-[70px] flex items-center justify-center pl-4" style="width: 450px;">
                  <img id="p2Character" src="https://placehold.co/80x80/232323/232323?text=" class="h-[70px] w-auto mr-3">
-                 <!-- This container is now centered and has a fixed width for accurate measurement -->
                  <div class="flex flex-col items-center text-center overflow-hidden w-[350px]">
                     <div id="p2-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
                         <span id="p2Sponsor" class="secondary-text"></span>
@@ -124,7 +157,6 @@
                 <span id="p2Status" class="secondary-text"></span>
             </div>
         </div>
-
         <!-- Centerpiece -->
         <div class="absolute left-1/2 -translate-x-1/2 bottom-[-25px] z-10 flex flex-col items-center">
              <div class="center-logo"></div>
@@ -156,11 +188,30 @@
             <span id="tickerText"></span>
         </div>
     </div>
+    
+    <!-- NEW: VS SCREEN ELEMENT -->
+    <div id="vs-screen">
+        <div id="vs-player1" class="vs-player">
+            <img id="vs-p1-char" src="" class="vs-char-render">
+            <div class="vs-player-info">
+                <div id="vs-p1-sponsor" class="vs-player-sponsor"></div>
+                <div id="vs-p1-tag" class="vs-player-tag"></div>
+            </div>
+        </div>
+        <div id="vs-text">VS</div>
+        <div id="vs-player2" class="vs-player">
+            <img id="vs-p2-char" src="" class="vs-char-render">
+             <div class="vs-player-info">
+                <div id="vs-p2-sponsor" class="vs-player-sponsor"></div>
+                <div id="vs-p2-tag" class="vs-player-tag"></div>
+            </div>
+        </div>
+    </div>
 
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { firebaseConfig } from './firebase-config.js';
 
@@ -176,8 +227,13 @@
                     return name.replace(/\./g, '').replace(/ /g, '');
             }
         };
+        // NEW: Mapping for full character renders
+        const characterRenders = { "Mario": "mario", "Donkey Kong": "donkey_kong", "Link": "link", "Samus": "samus", "Dark Samus": "dark_samus", "Yoshi": "yoshi", "Kirby": "kirby", "Fox": "fox", "Pikachu": "pikachu", "Luigi": "luigi", "Ness": "ness", "Captain Falcon": "captain_falcon", "Jigglypuff": "jigglypuff", "Peach": "peach", "Daisy": "daisy", "Bowser": "bowser", "Ice Climbers": "ice_climbers", "Sheik": "sheik", "Zelda": "zelda", "Dr. Mario": "dr_mario", "Pichu": "pichu", "Falco": "falco", "Marth": "marth", "Lucina": "lucina", "Young Link": "young_link", "Ganondorf": "ganondorf", "Mewtwo": "mewtwo", "Roy": "roy", "Chrom": "chrom", "Mr. Game & Watch": "mr_game_watch", "Meta Knight": "meta_knight", "Pit": "pit", "Dark Pit": "dark_pit", "Zero Suit Samus": "zero_suit_samus", "Wario": "wario", "Snake": "snake", "Ike": "ike", "Pokemon Trainer": "pokemon_trainer", "Diddy Kong": "diddy_kong", "Lucas": "lucas", "Sonic": "sonic", "King Dedede": "king_dedede", "Olimar": "olimar", "Lucario": "lucario", "R.O.B.": "rob", "Toon Link": "toon_link", "Wolf": "wolf", "Villager": "villager", "Mega Man": "mega_man", "Wii Fit Trainer": "wii_fit_trainer", "Rosalina & Luma": "rosalina_and_luma", "Little Mac": "little_mac", "Greninja": "greninja", "Mii Brawler": "mii_brawler", "Mii Swordfighter": "mii_swordfighter", "Mii Gunner": "mii_gunner", "Palutena": "palutena", "Pac-Man": "pac_man", "Robin": "robin", "Shulk": "shulk", "Bowser Jr.": "bowser_jr", "Duck Hunt": "duck_hunt", "Ryu": "ryu", "Ken": "ken", "Cloud": "cloud", "Corrin": "corrin", "Bayonetta": "bayonetta", "Inkling": "inkling", "Ridley": "ridley", "Simon": "simon", "Richter": "richter", "King K. Rool": "king_k_rool", "Isabelle": "isabelle", "Incineroar": "incineroar", "Piranha Plant": "piranha_plant", "Joker": "joker", "Hero": "hero", "Banjo & Kazooie": "banjo_and_kazooie", "Terry": "terry", "Byleth": "byleth", "Min Min": "min_min", "Steve": "steve", "Sephiroth": "sephiroth", "Pyra and Mythra": "pyra_mythra", "Kazuya": "kazuya", "Sora": "sora" };
+        const renderBaseUrl = "https://www.smashbros.com/assets_v2/img/fighter/";
+
         const stockIconBaseUrl = "https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/stockicons/";
         let currentData = {};
+        let vsScreenActive = false;
 
         const updateUIText = (data) => {
             document.body.dataset.theme = data.theme || 'osu';
@@ -249,36 +305,62 @@
             const tag = document.getElementById(`${playerId}Tag`);
             const theme = document.body.dataset.theme;
             
-            // Define theme-specific font sizes
             const maxTagSize = theme === 'remix' ? 2.5 : 2.2;
             const maxSponsorSize = theme === 'remix' ? 1.6 : 1.25;
             const minTagSize = 1.4; 
             const minSponsorSize = 0.9;
             const maxWidth = 350;
 
-            // Reset styles before measuring
             tag.style.fontSize = `${maxTagSize}rem`;
             sponsor.style.fontSize = `${maxSponsorSize}rem`;
 
-            // Use a timeout to allow the browser to render the new text and max font size before we measure it
             setTimeout(() => {
                 const currentWidth = container.scrollWidth;
                 
                 if (currentWidth > maxWidth) {
-                    const scale = (maxWidth / currentWidth) * 0.98; // Add a little padding
+                    const scale = (maxWidth / currentWidth) * 0.98;
                     const newTagSize = Math.max(minTagSize, maxTagSize * scale);
                     const newSponsorSize = Math.max(minSponsorSize, maxSponsorSize * scale);
-                    
                     tag.style.fontSize = `${newTagSize}rem`;
                     sponsor.style.fontSize = `${newSponsorSize}rem`;
                 }
-                // This 'else' is crucial. If the name is short, it ensures the font size goes back to max.
                 else {
                     tag.style.fontSize = `${maxTagSize}rem`;
                     sponsor.style.fontSize = `${maxSponsorSize}rem`;
                 }
             }, 50);
         };
+        
+        // --- NEW: VS SCREEN LOGIC ---
+        const triggerVsScreen = async (data, docRef) => {
+            if (vsScreenActive) return;
+            vsScreenActive = true;
+
+            // 1. Populate VS screen with data
+            const p1RenderSlug = characterRenders[data.p1Character];
+            const p2RenderSlug = characterRenders[data.p2Character];
+            
+            document.getElementById('vs-p1-char').src = p1RenderSlug ? `${renderBaseUrl}${p1RenderSlug}/main.png` : '';
+            document.getElementById('vs-p2-char').src = p2RenderSlug ? `${renderBaseUrl}${p2RenderSlug}/main.png` : '';
+
+            document.getElementById('vs-p1-sponsor').textContent = data.p1Sponsor || '';
+            document.getElementById('vs-p1-tag').textContent = data.p1Tag || 'Player 1';
+            document.getElementById('vs-p2-sponsor').textContent = data.p2Sponsor || '';
+            document.getElementById('vs-p2-tag').textContent = data.p2Tag || 'Player 2';
+            
+            // 2. Show the screen
+            const vsScreen = document.getElementById('vs-screen');
+            vsScreen.classList.add('visible');
+
+            // 3. Hide the screen after a delay
+            setTimeout(() => {
+                vsScreen.classList.remove('visible');
+                // Reset the trigger in the database
+                updateDoc(docRef, { showVsScreen: false });
+                vsScreenActive = false;
+            }, 6000); // Show for 6 seconds
+        };
+
 
         const main = async () => {
             try {
@@ -292,9 +374,13 @@
                 onSnapshot(docRef, (doc) => {
                     const data = doc.exists() ? doc.data() : {};
                     updateUIText(data);
-                    // Crucially, call the adjust function for EACH player independently
                     adjustPlayerFontSize('p1');
                     adjustPlayerFontSize('p2');
+
+                    // Check for the VS screen trigger
+                    if (data.showVsScreen && !vsScreenActive) {
+                        triggerVsScreen(data, docRef);
+                    }
                 });
             } catch (error) {
                 console.error("OVERLAY FAILED TO CONNECT:", error);
