@@ -45,8 +45,13 @@
     </style>
 </head>
 <body class="p-4 md:p-8">
-    <header class="flex justify-between items-center mb-6">
+    <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <h1 class="text-3xl font-bold font-['Oswald'] tracking-wider text-white">Overlay Control Panel</h1>
+        <!-- NEW STREAM ID SELECTOR -->
+        <div class="flex items-center gap-2">
+            <label for="streamId" class="font-bold text-lg">Stream ID:</label>
+            <input id="streamId" class="input-field w-48" value="default">
+        </div>
         <div id="status" class="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold">
             <span id="status-text">Connecting...</span>
             <div id="status-indicator" class="w-3 h-3 rounded-full bg-yellow-500"></div>
@@ -108,7 +113,6 @@
             <div class="pt-4 border-t border-gray-700 flex flex-col gap-2">
                  <button id="toggleCommentators" class="btn btn-secondary btn-toggle">Show Commentators</button>
                  <button id="toggleTicker" class="btn btn-secondary btn-toggle">Show Ticker</button>
-                 <!-- NEW VS SCREEN BUTTON -->
                  <button id="showVsScreen" class="btn btn-secondary bg-purple-700 hover:bg-purple-800">Show VS Screen</button>
             </div>
         </div>
@@ -164,7 +168,6 @@
         </div>
     </div>
 
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -182,59 +185,81 @@
             "Roy", "Ryu", "Samus", "Sephiroth", "Sheik", "Shulk", "Simon", "Snake", "Sora", "Sonic", "Steve", "Terry", 
             "Toon Link", "Villager", "Wario", "Wii Fit Trainer", "Wolf", "Yoshi", "Young Link", "Zelda", "Zero Suit Samus"
         ];
-
-        const p1CharSelect = document.getElementById('p1Character');
-        const p2CharSelect = document.getElementById('p2Character');
         characters.forEach(char => {
             const option = `<option value="${char}">${char}</option>`;
-            p1CharSelect.innerHTML += option;
-            p2CharSelect.innerHTML += option;
+            document.getElementById('p1Character').innerHTML += option;
+            document.getElementById('p2Character').innerHTML += option;
         });
 
         const statusIndicator = document.getElementById('status-indicator');
         const statusText = document.getElementById('status-text');
-        let db, auth, docRef, presetsColRef;
-        const appId = 'stillwater-smash-overlay';
+        let db, auth;
+        let docRef, presetsColRef;
+        let unsubscribeDoc, unsubscribePresets;
         
         let showCommentators = false;
         let showTicker = false;
 
+        const connectToStream = async () => {
+            // Unsubscribe from previous listeners if they exist
+            if (unsubscribeDoc) unsubscribeDoc();
+            if (unsubscribePresets) unsubscribePresets();
+
+            const streamId = document.getElementById('streamId').value.trim() || 'default';
+            localStorage.setItem('smashOverlayStreamId', streamId);
+
+            docRef = doc(db, 'overlays', streamId);
+            presetsColRef = collection(db, 'overlays', streamId, 'presets');
+
+            statusIndicator.classList.replace('bg-green-500', 'bg-yellow-500');
+            statusIndicator.classList.replace('bg-red-500', 'bg-yellow-500');
+            statusText.textContent = `Connecting to ${streamId}...`;
+            
+            try {
+                // Attach new listeners
+                unsubscribeDoc = onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        Object.keys(data).forEach(key => {
+                            const el = document.getElementById(key);
+                            if (el) el.value = data[key];
+                        });
+                        showCommentators = data.showCommentators || false;
+                        showTicker = data.showTicker || false;
+                        updateToggleButtons();
+                    }
+                    handleRoundChange(false);
+                });
+                
+                setupPresetListeners(); // This will now use the new presetsColRef
+
+                statusIndicator.classList.replace('bg-yellow-500', 'bg-green-500');
+                statusText.textContent = `Synced to ${streamId}`;
+            } catch (error) {
+                 console.error("DB connection failed:", error);
+                statusIndicator.classList.replace('bg-yellow-500', 'bg-red-500');
+                statusText.textContent = 'Connection Failed';
+            }
+        };
+
         const main = async () => {
+            document.getElementById('streamId').value = localStorage.getItem('smashOverlayStreamId') || 'default';
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 await signInAnonymously(auth);
-                docRef = doc(db, 'overlays', appId);
-                presetsColRef = collection(db, 'overlays', appId, 'presets');
-                statusIndicator.classList.replace('bg-yellow-500', 'bg-green-500');
-                statusText.textContent = 'Connected & Synced';
-                loadInitialData();
-                setupListeners();
-                setupPresetListeners();
+                await connectToStream(); // Initial connection
+                setupStaticListeners();
             } catch (error) {
-                console.error("DB connection failed:", error);
+                 console.error("Initial connection failed:", error);
                 statusIndicator.classList.replace('bg-yellow-500', 'bg-red-500');
-                statusText.textContent = 'DB Connection Failed';
+                statusText.textContent = 'DB Init Failed';
             }
-        };
-
-        const loadInitialData = async () => {
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                Object.keys(data).forEach(key => {
-                    const el = document.getElementById(key);
-                    if (el) el.value = data[key];
-                });
-                showCommentators = data.showCommentators || false;
-                showTicker = data.showTicker || false;
-                updateToggleButtons();
-            }
-            handleRoundChange(false);
         };
 
         const saveData = async () => {
+            if (!docRef) return; // Don't save if not connected
             const data = {
                 p1Sponsor: document.getElementById('p1Sponsor').value, p1Tag: document.getElementById('p1Tag').value,
                 p1Pronouns: document.getElementById('p1Pronouns').value, p1Status: document.getElementById('p1Status').value,
@@ -254,7 +279,6 @@
                 tickerText: document.getElementById('tickerText').value,
                 showCommentators: showCommentators,
                 showTicker: showTicker,
-                // Don't save showVsScreen, it's a one-time trigger
             };
             try {
                 await setDoc(docRef, data, { merge: true });
@@ -267,27 +291,11 @@
             const roundText = document.getElementById('round').value.toLowerCase();
             const p1StatusInput = document.getElementById('p1Status');
             const p2StatusInput = document.getElementById('p2Status');
-
-            if (roundText.includes('grand') || roundText.includes('true')) {
-                p1StatusInput.value = 'Winners';
-                p2StatusInput.value = 'Losers';
-            } 
-            else if (roundText.includes('losers')) {
-                p1StatusInput.value = 'Losers';
-                p2StatusInput.value = 'Losers';
-            } 
-            else if (roundText.includes('winners') || roundText.trim() === '') {
-                p1StatusInput.value = 'Winners';
-                p2StatusInput.value = 'Winners';
-            }
-            else {
-                p1StatusInput.value = '';
-                p2StatusInput.value = '';
-            }
-            
-            if (shouldSave) {
-                saveData();
-            }
+            if (roundText.includes('grand') || roundText.includes('true')) { p1StatusInput.value = 'Winners'; p2StatusInput.value = 'Losers'; } 
+            else if (roundText.includes('losers')) { p1StatusInput.value = 'Losers'; p2StatusInput.value = 'Losers'; } 
+            else if (roundText.includes('winners') || roundText.trim() === '') { p1StatusInput.value = 'Winners'; p2StatusInput.value = 'Winners'; }
+            else { p1StatusInput.value = ''; p2StatusInput.value = ''; }
+            if (shouldSave) saveData();
         };
 
         const updateToggleButtons = () => {
@@ -299,12 +307,9 @@
             tickerBtn.classList.toggle('active', showTicker);
         };
 
-        const setupListeners = () => {
-            document.querySelectorAll('input, select').forEach(el => {
-                if (el.id !== 'round') {
-                    el.addEventListener('change', saveData);
-                }
-            });
+        const setupStaticListeners = () => {
+            document.getElementById('streamId').addEventListener('change', connectToStream);
+            document.querySelectorAll('input, select').forEach(el => { if (el.id !== 'round' && el.id !== 'streamId') el.addEventListener('change', saveData) });
             document.getElementById('round').addEventListener('input', () => handleRoundChange(true));
             document.getElementById('forceUpdate').addEventListener('click', saveData);
             document.getElementById('p1ScorePlus').addEventListener('click', () => { document.getElementById('p1Score').value++; saveData(); });
@@ -314,50 +319,32 @@
             document.getElementById('swapPlayers').addEventListener('click', () => {
                 const fields = ['Sponsor', 'Tag', 'Pronouns', 'Status', 'Score', 'Character', 'Alt'];
                 fields.forEach(field => {
-                    const p1El = document.getElementById(`p1${field}`);
-                    const p2El = document.getElementById(`p2${field}`);
-                    const temp = p1El.value;
-                    p1El.value = p2El.value;
-                    p2El.value = temp;
+                    const p1El = document.getElementById(`p1${field}`); const p2El = document.getElementById(`p2${field}`);
+                    const temp = p1El.value; p1El.value = p2El.value; p2El.value = temp;
                 });
                 saveData();
             });
             document.getElementById('resetMatch').addEventListener('click', () => {
-                document.getElementById('p1Score').value = 0;
-                document.getElementById('p2Score').value = 0;
+                document.getElementById('p1Score').value = 0; document.getElementById('p2Score').value = 0;
                 handleRoundChange(true);
             });
             document.getElementById('p1Clear').addEventListener('click', () => {
-                document.getElementById('p1Sponsor').value = '';
-                document.getElementById('p1Tag').value = '';
-                document.getElementById('p1Pronouns').value = '';
+                document.getElementById('p1Sponsor').value = ''; document.getElementById('p1Tag').value = ''; document.getElementById('p1Pronouns').value = '';
                 saveData();
             });
             document.getElementById('p2Clear').addEventListener('click', () => {
-                document.getElementById('p2Sponsor').value = '';
-                document.getElementById('p2Tag').value = '';
-                document.getElementById('p2Pronouns').value = '';
+                document.getElementById('p2Sponsor').value = ''; document.getElementById('p2Tag').value = ''; document.getElementById('p2Pronouns').value = '';
                 saveData();
             });
-            document.getElementById('toggleCommentators').addEventListener('click', () => {
-                showCommentators = !showCommentators;
-                updateToggleButtons();
-                saveData();
-            });
-            document.getElementById('toggleTicker').addEventListener('click', () => {
-                showTicker = !showTicker;
-                updateToggleButtons();
-                saveData();
-            });
-            // NEW VS SCREEN LISTENER
-            document.getElementById('showVsScreen').addEventListener('click', async () => {
-                // We use updateDoc here to send a one-time signal to the overlay
-                await updateDoc(docRef, { showVsScreen: true });
-            });
+            document.getElementById('toggleCommentators').addEventListener('click', () => { showCommentators = !showCommentators; updateToggleButtons(); saveData(); });
+            document.getElementById('toggleTicker').addEventListener('click', () => { showTicker = !showTicker; updateToggleButtons(); saveData(); });
+            document.getElementById('showVsScreen').addEventListener('click', async () => { if (docRef) await updateDoc(docRef, { showVsScreen: true }); });
         };
 
-        const setupPresetListeners = () => {
-            onSnapshot(presetsColRef, (snapshot) => {
+        function setupPresetListeners() {
+            if (unsubscribePresets) unsubscribePresets(); // Clear old listener
+            
+            unsubscribePresets = onSnapshot(presetsColRef, (snapshot) => {
                 const p1PresetSelect = document.getElementById('p1Preset');
                 const p2PresetSelect = document.getElementById('p2Preset');
                 const currentP1 = p1PresetSelect.value;
@@ -373,28 +360,19 @@
                 p2PresetSelect.value = currentP2;
             });
             
-            document.getElementById('p1PresetSave').addEventListener('click', async () => {
+            // Re-attach save/load/delete listeners as they depend on presetsColRef
+            document.getElementById('p1PresetSave').onclick = async () => {
                 const tag = document.getElementById('p1Tag').value.trim();
-                if (!tag) { alert("Player tag cannot be empty to save a preset."); return; }
-                await addDoc(presetsColRef, {
-                    tag: tag,
-                    sponsor: document.getElementById('p1Sponsor').value,
-                    pronouns: document.getElementById('p1Pronouns').value
-                });
-            });
-            document.getElementById('p2PresetSave').addEventListener('click', async () => {
-                const tag = document.getElementById('p2Tag').value.trim();
-                if (!tag) { alert("Player tag cannot be empty to save a preset."); return; }
-                await addDoc(presetsColRef, {
-                    tag: tag,
-                    sponsor: document.getElementById('p2Sponsor').value,
-                    pronouns: document.getElementById('p2Pronouns').value
-                });
-            });
-            
-            document.getElementById('p1PresetLoad').addEventListener('click', async () => {
-                const id = document.getElementById('p1Preset').value;
-                if (!id) return;
+                if (!tag) { alert("Player tag cannot be empty."); return; }
+                await addDoc(presetsColRef, { tag: tag, sponsor: document.getElementById('p1Sponsor').value, pronouns: document.getElementById('p1Pronouns').value });
+            };
+            document.getElementById('p2PresetSave').onclick = async () => {
+                 const tag = document.getElementById('p2Tag').value.trim();
+                if (!tag) { alert("Player tag cannot be empty."); return; }
+                await addDoc(presetsColRef, { tag: tag, sponsor: document.getElementById('p2Sponsor').value, pronouns: document.getElementById('p2Pronouns').value });
+            };
+            document.getElementById('p1PresetLoad').onclick = async () => {
+                const id = document.getElementById('p1Preset').value; if (!id) return;
                 const docSnap = await getDoc(doc(presetsColRef, id));
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -403,10 +381,9 @@
                     document.getElementById('p1Pronouns').value = data.pronouns;
                     saveData();
                 }
-            });
-            document.getElementById('p2PresetLoad').addEventListener('click', async () => {
-                const id = document.getElementById('p2Preset').value;
-                if (!id) return;
+            };
+             document.getElementById('p2PresetLoad').onclick = async () => {
+                const id = document.getElementById('p2Preset').value; if (!id) return;
                 const docSnap = await getDoc(doc(presetsColRef, id));
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -415,19 +392,16 @@
                     document.getElementById('p2Pronouns').value = data.pronouns;
                     saveData();
                 }
-            });
-
-            document.getElementById('p1PresetDelete').addEventListener('click', async () => {
-                const id = document.getElementById('p1Preset').value;
-                if (!id) return;
+            };
+            document.getElementById('p1PresetDelete').onclick = async () => {
+                const id = document.getElementById('p1Preset').value; if (!id) return;
                 await deleteDoc(doc(presetsColRef, id));
-            });
-            document.getElementById('p2PresetDelete').addEventListener('click', async () => {
-                const id = document.getElementById('p2Preset').value;
-                if (!id) return;
+            };
+            document.getElementById('p2PresetDelete').onclick = async () => {
+                const id = document.getElementById('p2Preset').value; if (!id) return;
                 await deleteDoc(doc(presetsColRef, id));
-            });
-        };
+            };
+        }
 
         main();
     </script>
