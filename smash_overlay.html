@@ -56,70 +56,31 @@
         .ticker-content { display: inline-block; white-space: nowrap; animation: scroll-left 20s linear infinite; }
         @keyframes scroll-left { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
-        /* --- UPDATED: VS SCREEN & SCOREBOARD ANIMATIONS --- */
-        #scoreboard-container {
-            transition: transform 0.5s ease-in-out;
-        }
-        #scoreboard-container.hidden {
-            transform: translateY(-200px);
-        }
-
-        #vs-screen {
-            position: absolute;
-            top: 0; left: 0;
-            width: 1920px; height: 1080px;
-            /* Transparent background, no blur */
-            background-color: transparent;
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease-in-out;
-        }
+        #scoreboard-container { transition: transform 0.5s ease-in-out; }
+        #scoreboard-container.hidden { transform: translateY(-200px); }
+        #vs-screen { position: absolute; top: 0; left: 0; width: 1920px; height: 1080px; background-color: transparent; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; display: flex; justify-content: center; align-items: center; }
         #vs-screen.visible { opacity: 1; pointer-events: auto; }
-
-        .vs-player-card {
-            position: absolute;
-            bottom: 120px; /* Aligns with in-game UI */
-            opacity: 0;
-        }
-        #vs-player1-card { 
-            left: 280px;
-            text-align: left;
-            animation: slide-in-vs 0.5s 0.2s forwards;
-        }
-        #vs-player2-card { 
-            right: 280px;
-            text-align: right;
-            animation: slide-in-vs 0.5s 0.4s forwards;
-        }
-        
-        .vs-player-tag {
-            font-family: 'Oswald', sans-serif;
-            font-size: 4rem;
-            text-shadow: 0 0 10px black, 0 0 15px black;
-        }
-        .vs-player-sponsor {
-            font-family: 'Roboto Slab', serif;
-            font-size: 2rem;
-            opacity: 0.8;
-            text-shadow: 0 0 8px black;
-        }
+        .vs-player-card { position: absolute; bottom: 120px; opacity: 0; }
+        #vs-player1-card { left: 280px; text-align: left; animation: slide-in-vs 0.5s 0.2s forwards; }
+        #vs-player2-card { right: 280px; text-align: right; animation: slide-in-vs 0.5s 0.4s forwards; }
+        .vs-player-tag { font-family: 'Oswald', sans-serif; font-size: 4rem; text-shadow: 0 0 10px black, 0 0 15px black; }
+        .vs-player-sponsor { font-family: 'Roboto Slab', serif; font-size: 2rem; opacity: 0.8; text-shadow: 0 0 8px black; }
         [data-theme="osu"] #vs-player1-card .vs-player-tag { color: #FF7300; }
         [data-theme="osu"] #vs-player2-card .vs-player-tag { color: #cccccc; }
         [data-theme="remix"] .vs-player-tag { color: #6FFFB0; }
         [data-theme="remix"] .vs-player-sponsor { font-family: 'Lobster', cursive; color: white; }
-
-        @keyframes slide-in-vs { 
-            0% { opacity: 0; transform: translateY(50px); } 
-            100% { opacity: 1; transform: translateY(0); } 
-        }
+        @keyframes slide-in-vs { 0% { opacity: 0; transform: translateY(50px); } 100% { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="flex items-start justify-center pt-8" data-theme="osu"> 
 
+    <div id="instruction-message" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center bg-red-800 p-8 rounded-lg shadow-lg">
+        <h1 class="text-4xl font-bold">Configuration Error</h1>
+        <p class="text-xl mt-2">Please set a Stream ID in the OBS Browser Source URL.<br>Example: `.../smash_overlay.html?stream=station1`</p>
+    </div>
+
     <div id="scoreboard-container" class="w-[1200px] h-[120px] flex items-center justify-between relative">
         <!-- Main Overlay Content -->
-        <!-- Player 1 -->
         <div class="h-full flex items-center">
             <div id="p1ScoreBox" class="score-box p1-score-box flex flex-col items-center justify-center">
                 <span id="p1Score" class="text-4xl leading-none">0</span>
@@ -136,7 +97,6 @@
                 <img id="p1Character" src="https://placehold.co/80x80/FF7300/FF7300?text=" class="h-[70px] w-auto ml-3">
             </div>
         </div>
-        <!-- Player 2 -->
         <div class="h-full flex items-center">
              <div class="p2-bar h-[70px] flex items-center justify-center pl-4" style="width: 450px;">
                  <img id="p2Character" src="https://placehold.co/80x80/232323/232323?text=" class="h-[70px] w-auto mr-3">
@@ -153,7 +113,6 @@
                 <span id="p2Status" class="secondary-text"></span>
             </div>
         </div>
-        <!-- Centerpiece -->
         <div class="absolute left-1/2 -translate-x-1/2 bottom-[-25px] z-10 flex flex-col items-center">
              <div class="center-logo"></div>
              <div class="match-info-box px-4 py-1 rounded-md text-center -mt-2">
@@ -163,40 +122,18 @@
     </div>
     
     <div id="commentators" class="lower-third">
-        <div id="comm1-box" class="commentator-box">
-            <i class="fas fa-microphone text-2xl"></i>
-            <div>
-                <div id="commentator1Name" class="comm-name"></div>
-                <div id="commentator1Social" class="comm-social"></div>
-            </div>
-        </div>
-        <div id="comm2-box" class="commentator-box">
-            <i class="fas fa-microphone text-2xl"></i>
-            <div>
-                <div id="commentator2Name" class="comm-name"></div>
-                <div id="commentator2Social" class="comm-social"></div>
-            </div>
-        </div>
+        <div id="comm1-box" class="commentator-box"> <i class="fas fa-microphone text-2xl"></i> <div> <div id="commentator1Name" class="comm-name"></div> <div id="commentator1Social" class="comm-social"></div> </div> </div>
+        <div id="comm2-box" class="commentator-box"> <i class="fas fa-microphone text-2xl"></i> <div> <div id="commentator2Name" class="comm-name"></div> <div id="commentator2Social" class="comm-social"></div> </div> </div>
     </div>
 
     <div id="ticker" class="ticker">
-        <div class="ticker-content text-2xl font-['Oswald']">
-            <span id="tickerText"></span>
-        </div>
+        <div class="ticker-content text-2xl font-['Oswald']"> <span id="tickerText"></span> </div>
     </div>
     
-    <!-- UPDATED VS SCREEN ELEMENT (no more VS text) -->
     <div id="vs-screen">
-        <div id="vs-player1-card" class="vs-player-card">
-            <div id="vs-p1-sponsor" class="vs-player-sponsor"></div>
-            <div id="vs-p1-tag" class="vs-player-tag"></div>
-        </div>
-        <div id="vs-player2-card" class="vs-player-card">
-            <div id="vs-p2-sponsor" class="vs-player-sponsor"></div>
-            <div id="vs-p2-tag" class="vs-player-tag"></div>
-        </div>
+        <div id="vs-player1-card" class="vs-player-card"> <div id="vs-p1-sponsor" class="vs-player-sponsor"></div> <div id="vs-p1-tag" class="vs-player-tag"></div> </div>
+        <div id="vs-player2-card" class="vs-player-card"> <div id="vs-p2-sponsor" class="vs-player-sponsor"></div> <div id="vs-p2-tag" class="vs-player-tag"></div> </div>
     </div>
-
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -224,7 +161,6 @@
             document.body.dataset.theme = data.theme || 'osu';
             if (data.p1Score > (currentData.p1Score || 0)) animateScore('p1Score');
             if (data.p2Score > (currentData.p2Score || 0)) animateScore('p2Score');
-
             document.getElementById('p1Sponsor').textContent = data.p1Sponsor || '';
             document.getElementById('p1Tag').textContent = data.p1Tag || 'Player 1';
             document.getElementById('p1Pronouns').textContent = data.p1Pronouns || '';
@@ -232,7 +168,6 @@
             p1StatusEl.textContent = data.p1Status || '';
             p1StatusEl.style.visibility = data.p1Status ? 'visible' : 'hidden';
             document.getElementById('p1Score').textContent = data.p1Score ?? 0;
-
             document.getElementById('p2Sponsor').textContent = data.p2Sponsor || '';
             document.getElementById('p2Tag').textContent = data.p2Tag || 'Player 2';
             document.getElementById('p2Pronouns').textContent = data.p2Pronouns || '';
@@ -240,40 +175,27 @@
             p2StatusEl.textContent = data.p2Status || '';
             p2StatusEl.style.visibility = data.p2Status ? 'visible' : 'hidden';
             document.getElementById('p2Score').textContent = data.p2Score ?? 0;
-            
             document.getElementById('round').textContent = data.round || 'Grand Finals';
             document.getElementById('format').textContent = `${data.formatPrefix || 'Best of'} ${data.formatNumber || 5}`;
-
             const p1CharFile = formatCharNameForFile(data.p1Character);
             const p1Alt = data.p1Alt || 1;
             document.getElementById('p1Character').src = p1CharFile ? `${stockIconBaseUrl}${p1CharFile}${p1Alt}.png` : 'https://placehold.co/80x80/FF7300/FF7300?text=';
-            
             const p2CharFile = formatCharNameForFile(data.p2Character);
             const p2Alt = data.p2Alt || 1;
             document.getElementById('p2Character').src = p2CharFile ? `${stockIconBaseUrl}${p2CharFile}${p2Alt}.png` : 'https://placehold.co/80x80/232323/232323?text=';
-            
             document.getElementById('commentator1Name').textContent = data.commentator1Name || '';
             document.getElementById('commentator1Social').textContent = data.commentator1Social || '';
             document.getElementById('commentator2Name').textContent = data.commentator2Name || '';
             document.getElementById('commentator2Social').textContent = data.commentator2Social || '';
             document.getElementById('tickerText').textContent = data.tickerText || '';
-
             document.getElementById('comm1-box').style.display = data.commentator1Name ? 'flex' : 'none';
             document.getElementById('comm2-box').style.display = data.commentator2Name ? 'flex' : 'none';
-
             document.getElementById('commentators').classList.toggle('visible', data.showCommentators);
             document.getElementById('ticker').classList.toggle('visible', data.showTicker);
-
             checkSetPoint(data);
             currentData = data;
         };
-        
-        const animateScore = (elementId) => {
-            const el = document.getElementById(elementId);
-            el.classList.add('score-updated');
-            setTimeout(() => el.classList.remove('score-updated'), 400);
-        };
-
+        const animateScore = (elementId) => { const el = document.getElementById(elementId); el.classList.add('score-updated'); setTimeout(() => el.classList.remove('score-updated'), 400); };
         const checkSetPoint = (data) => {
             const formatPrefix = data.formatPrefix || 'Best of';
             const formatNumber = parseInt(data.formatNumber, 10) || 5;
@@ -283,89 +205,76 @@
             p1ScoreBox.classList.toggle('set-point', data.p1Score === winScore - 1 && winScore > 1);
             p2ScoreBox.classList.toggle('set-point', data.p2Score === winScore - 1 && winScore > 1);
         };
-
         const adjustPlayerFontSize = (playerId) => {
             const container = document.getElementById(`${playerId}-name-container`);
             const sponsor = document.getElementById(`${playerId}Sponsor`);
             const tag = document.getElementById(`${playerId}Tag`);
             const theme = document.body.dataset.theme;
-            
-            const maxTagSize = theme === 'remix' ? 2.5 : 2.2;
-            const maxSponsorSize = theme === 'remix' ? 1.6 : 1.25;
-            const minTagSize = 1.4; 
-            const minSponsorSize = 0.9;
+            const maxTagSize = theme === 'remix' ? 2.5 : 2.2; const maxSponsorSize = theme === 'remix' ? 1.6 : 1.25;
+            const minTagSize = 1.4; const minSponsorSize = 0.9;
             const maxWidth = 350;
-
-            tag.style.fontSize = `${maxTagSize}rem`;
-            sponsor.style.fontSize = `${maxSponsorSize}rem`;
-
+            tag.style.fontSize = `${maxTagSize}rem`; sponsor.style.fontSize = `${maxSponsorSize}rem`;
             setTimeout(() => {
                 const currentWidth = container.scrollWidth;
-                
                 if (currentWidth > maxWidth) {
                     const scale = (maxWidth / currentWidth) * 0.98;
                     const newTagSize = Math.max(minTagSize, maxTagSize * scale);
                     const newSponsorSize = Math.max(minSponsorSize, maxSponsorSize * scale);
-                    tag.style.fontSize = `${newTagSize}rem`;
-                    sponsor.style.fontSize = `${newSponsorSize}rem`;
-                }
-                else {
-                    tag.style.fontSize = `${maxTagSize}rem`;
-                    sponsor.style.fontSize = `${maxSponsorSize}rem`;
+                    tag.style.fontSize = `${newTagSize}rem`; sponsor.style.fontSize = `${newSponsorSize}rem`;
+                } else {
+                    tag.style.fontSize = `${maxTagSize}rem`; sponsor.style.fontSize = `${maxSponsorSize}rem`;
                 }
             }, 50);
         };
-        
         const triggerVsScreen = async (data, docRef) => {
             if (vsScreenActive) return;
             vsScreenActive = true;
-
             const scoreboard = document.getElementById('scoreboard-container');
             const vsScreen = document.getElementById('vs-screen');
-
-            // 1. Hide scoreboard
             scoreboard.classList.add('hidden');
-
-            // 2. Populate and show VS screen
             document.getElementById('vs-p1-sponsor').textContent = data.p1Sponsor || '';
             document.getElementById('vs-p1-tag').textContent = data.p1Tag || 'Player 1';
             document.getElementById('vs-p2-sponsor').textContent = data.p2Sponsor || '';
             document.getElementById('vs-p2-tag').textContent = data.p2Tag || 'Player 2';
             vsScreen.classList.add('visible');
-
-            // 3. Hide VS screen after a delay
             setTimeout(() => {
                 vsScreen.classList.remove('visible');
-                // 4. Show scoreboard again
                 scoreboard.classList.remove('hidden');
-                
                 updateDoc(docRef, { showVsScreen: false });
                 vsScreenActive = false;
-            }, 5000); // Total duration is now 5 seconds
+            }, 5000);
         };
 
-
         const main = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const streamId = urlParams.get('stream');
+
+            if (!streamId) {
+                document.getElementById('scoreboard-container').style.display = 'none';
+                document.getElementById('instruction-message').classList.remove('hidden');
+                return;
+            }
+
             try {
                 const app = initializeApp(firebaseConfig);
                 const db = getFirestore(app);
                 const auth = getAuth(app);
                 await signInAnonymously(auth);
-                const appId = 'stillwater-smash-overlay'; 
-                const docRef = doc(db, 'overlays', appId);
-
+                const docRef = doc(db, 'overlays', streamId);
                 onSnapshot(docRef, (doc) => {
                     const data = doc.exists() ? doc.data() : {};
                     updateUIText(data);
                     adjustPlayerFontSize('p1');
                     adjustPlayerFontSize('p2');
-
                     if (data.showVsScreen && !vsScreenActive) {
                         triggerVsScreen(data, docRef);
                     }
                 });
             } catch (error) {
                 console.error("OVERLAY FAILED TO CONNECT:", error);
+                document.getElementById('scoreboard-container').style.display = 'none';
+                document.getElementById('instruction-message').classList.add('hidden');
+                document.getElementById('instruction-message').innerHTML = `<h1 class="text-4xl font-bold">Connection Error</h1><p class="text-xl mt-2">Failed to connect to the database. Check console for details.</p>`;
             }
         };
 
