@@ -6,56 +6,20 @@
     <title>Smash Bros. Ultimate OBS Overlay</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Roboto+Slab:wght@400;700&family=Anton&family=Lobster&display=swap" rel="stylesheet">
-    <!-- Font Awesome for microphone icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body {
-            background-color: transparent;
-            color: white;
-            overflow: hidden;
-            width: 1920px;
-            height: 1080px;
-            font-family: 'Roboto Slab', serif;
-        }
+        body { background-color: transparent; color: white; overflow: hidden; width: 1920px; height: 1080px; font-family: 'Roboto Slab', serif; }
 
         /* --- SHARED STYLES --- */
-        .score-box {
-            font-weight: 700;
-            width: 80px;
-            height: 80px;
-            transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
-        }
-
-        @keyframes score-update-pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.25); color: #FFF700; }
-            100% { transform: scale(1); }
-        }
-        .score-updated {
-            animation: score-update-pulse 0.4s ease-in-out;
-        }
-
-        @keyframes set-point-glow {
-            0% { box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700; }
-            50% { box-shadow: 0 0 25px #FFD700, 0 0 40px #FFD700; }
-            100% { box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700; }
-        }
-        .set-point {
-            animation: set-point-glow 1.5s infinite;
-        }
+        .score-box { font-weight: 700; width: 80px; height: 80px; transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out; }
+        @keyframes score-update-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.25); color: #FFF700; } 100% { transform: scale(1); } }
+        .score-updated { animation: score-update-pulse 0.4s ease-in-out; }
         
         /* --- OSU THEME --- */
         [data-theme="osu"] .player-tag-text { font-family: 'Oswald', sans-serif; text-transform: uppercase; font-size: 2.2rem; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; }
         [data-theme="osu"] .secondary-text { font-family: 'Roboto Slab', serif; text-transform: uppercase; font-size: 1.25rem; text-shadow: -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000; color: #ffffff; }
         [data-theme="osu"] .score-box { background-color: white; color: #FF7300; font-family: 'Oswald', sans-serif; }
-        /* UPDATED OSU STATUS TEXT */
-        [data-theme="osu"] .score-box .secondary-text {
-            color: #232323;
-            text-shadow: none;
-            font-family: 'Oswald', sans-serif;
-            font-size: 0.9rem; /* Increased size */
-            margin-top: -0.25rem;
-        }
+        [data-theme="osu"] .score-box .secondary-text { color: #232323; text-shadow: none; font-family: 'Oswald', sans-serif; font-size: 0.9rem; margin-top: -0.25rem; }
         [data-theme="osu"] .p1-score-box { clip-path: polygon(0 0, 100% 0, 100% 100%, 25% 100%, 0 75%); }
         [data-theme="osu"] .p2-score-box { clip-path: polygon(0 0, 100% 0, 100% 75%, 75% 100%, 0 100%); }
         [data-theme="osu"] .p1-bar { background-color: #FF7300; }
@@ -104,11 +68,47 @@
         [data-theme="remix"] .vs-player-tag { color: #6FFFB0; }
         [data-theme="remix"] .vs-player-sponsor { font-family: 'Lobster', cursive; color: white; }
         @keyframes slide-in-vs { 0% { opacity: 0; transform: translateY(50px); } 100% { opacity: 1; transform: translateY(0); } }
+
+        /* --- NEW: MATCH POINT GRAPHIC --- */
+        .match-point-graphic {
+            position: absolute;
+            top: 130px; /* Position below the main scoreboard */
+            font-family: 'Anton', sans-serif;
+            font-size: 2rem;
+            text-transform: uppercase;
+            padding: 0.25rem 1rem;
+            border-radius: 0.25rem;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .match-point-graphic.visible {
+            animation: match-point-flash 1.5s infinite;
+        }
+        #p1-match-point { left: 450px; }
+        #p2-match-point { right: 450px; }
+
+        [data-theme="osu"] .match-point-graphic {
+            background-color: #FF7300;
+            color: white;
+            text-shadow: 0 0 8px black;
+        }
+        [data-theme="remix"] .match-point-graphic {
+            background-color: #6FFFB0;
+            color: #1A202C;
+            text-shadow: 0 0 8px white;
+        }
+        @keyframes match-point-flash {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
     </style>
 </head>
 <body class="flex items-start justify-center pt-8" data-theme="osu"> 
 
     <div id="scoreboard-container" class="w-[1200px] h-[120px] flex items-center justify-between relative">
+        <!-- Main Overlay Content -->
         <!-- Player 1 -->
         <div class="h-full flex items-center">
             <div id="p1ScoreBox" class="score-box p1-score-box flex flex-col items-center justify-center">
@@ -126,7 +126,6 @@
                 <img id="p1Character" src="https://placehold.co/80x80/FF7300/FF7300?text=" class="h-[70px] w-auto ml-3">
             </div>
         </div>
-        
         <!-- Player 2 -->
         <div class="h-full flex items-center">
              <div class="p2-bar h-[70px] flex items-center justify-center pl-4" style="width: 450px;">
@@ -144,7 +143,6 @@
                 <span id="p2Status" class="secondary-text"></span>
             </div>
         </div>
-
         <!-- Centerpiece -->
         <div class="absolute left-1/2 -translate-x-1/2 bottom-[-25px] z-10 flex flex-col items-center">
              <div class="center-logo"></div>
@@ -167,6 +165,11 @@
         <div id="vs-player1-card" class="vs-player-card"> <div id="vs-p1-sponsor" class="vs-player-sponsor"></div> <div id="vs-p1-tag" class="vs-player-tag"></div> </div>
         <div id="vs-player2-card" class="vs-player-card"> <div id="vs-p2-sponsor" class="vs-player-sponsor"></div> <div id="vs-p2-tag" class="vs-player-tag"></div> </div>
     </div>
+    
+    <!-- NEW: MATCH POINT ELEMENTS -->
+    <div id="p1-match-point" class="match-point-graphic">Match Point</div>
+    <div id="p2-match-point" class="match-point-graphic">Match Point</div>
+
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -175,9 +178,8 @@
         import { firebaseConfig } from './firebase-config.js';
 
         const formatCharNameForFile = (name) => {
-            if (!name) return '';
+             if (!name) return '';
             switch (name) {
-                // CORRECTED Banjo mapping
                 case "Banjo & Kazooie": return "BanjoAndKazooie";
                 case "Ice Climbers": return "IceClimbersPopo";
                 case "Pyra and Mythra": return "Pyra";
@@ -231,14 +233,26 @@
             currentData = data;
         };
         const animateScore = (elementId) => { const el = document.getElementById(elementId); el.classList.add('score-updated'); setTimeout(() => el.classList.remove('score-updated'), 400); };
-        const checkSetPoint = (data) => {
+        
+        // UPDATED checkSetPoint function to checkMatchPoint
+        const checkMatchPoint = (data) => {
             const formatPrefix = data.formatPrefix || 'Best of';
             const formatNumber = parseInt(data.formatNumber, 10) || 5;
-            let winScore = (formatPrefix === 'Best of') ? Math.ceil(formatNumber / 2) : formatNumber;
-            const p1ScoreBox = document.getElementById('p1ScoreBox');
-            const p2ScoreBox = document.getElementById('p2ScoreBox');
-            p1ScoreBox.classList.toggle('set-point', data.p1Score === winScore - 1 && winScore > 1);
-            p2ScoreBox.classList.toggle('set-point', data.p2Score === winScore - 1 && winScore > 1);
+            let winScore;
+
+            if (formatNumber <= 1) { // No match point in a single game
+                winScore = 999; 
+            } else if (formatPrefix === 'Best of') {
+                winScore = Math.ceil(formatNumber / 2);
+            } else { // First to
+                winScore = formatNumber;
+            }
+
+            const p1MatchPointEl = document.getElementById('p1-match-point');
+            const p2MatchPointEl = document.getElementById('p2-match-point');
+            
+            p1MatchPointEl.classList.toggle('visible', data.p1Score === winScore - 1);
+            p2MatchPointEl.classList.toggle('visible', data.p2Score === winScore - 1);
         };
 
         const adjustPlayerFontSize = (playerId) => {
@@ -305,6 +319,8 @@
                 const docRef = doc(db, 'overlays', streamId);
                 onSnapshot(docRef, (doc) => {
                     const data = doc.exists() ? doc.data() : {};
+                    // Call the match point logic INSTEAD of the old set point
+                    checkMatchPoint(data); 
                     updateUIText(data);
                     adjustPlayerFontSize('p1');
                     adjustPlayerFontSize('p2');
