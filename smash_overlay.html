@@ -6,22 +6,56 @@
     <title>Smash Bros. Ultimate OBS Overlay</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Roboto+Slab:wght@400;700&family=Anton&family=Lobster&display=swap" rel="stylesheet">
+    <!-- Font Awesome for microphone icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { background-color: transparent; color: white; overflow: hidden; width: 1920px; height: 1080px; font-family: 'Roboto Slab', serif; }
+        body {
+            background-color: transparent;
+            color: white;
+            overflow: hidden;
+            width: 1920px;
+            height: 1080px;
+            font-family: 'Roboto Slab', serif;
+        }
 
         /* --- SHARED STYLES --- */
-        .score-box { font-weight: 700; width: 80px; height: 80px; transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out; }
-        @keyframes score-update-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.25); color: #FFF700; } 100% { transform: scale(1); } }
-        .score-updated { animation: score-update-pulse 0.4s ease-in-out; }
-        @keyframes set-point-glow { 0% { box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700; } 50% { box-shadow: 0 0 25px #FFD700, 0 0 40px #FFD700; } 100% { box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700; } }
-        .set-point { animation: set-point-glow 1.5s infinite; }
+        .score-box {
+            font-weight: 700;
+            width: 80px;
+            height: 80px;
+            transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        @keyframes score-update-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.25); color: #FFF700; }
+            100% { transform: scale(1); }
+        }
+        .score-updated {
+            animation: score-update-pulse 0.4s ease-in-out;
+        }
+
+        @keyframes set-point-glow {
+            0% { box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700; }
+            50% { box-shadow: 0 0 25px #FFD700, 0 0 40px #FFD700; }
+            100% { box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700; }
+        }
+        .set-point {
+            animation: set-point-glow 1.5s infinite;
+        }
         
         /* --- OSU THEME --- */
         [data-theme="osu"] .player-tag-text { font-family: 'Oswald', sans-serif; text-transform: uppercase; font-size: 2.2rem; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; }
         [data-theme="osu"] .secondary-text { font-family: 'Roboto Slab', serif; text-transform: uppercase; font-size: 1.25rem; text-shadow: -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000; color: #ffffff; }
         [data-theme="osu"] .score-box { background-color: white; color: #FF7300; font-family: 'Oswald', sans-serif; }
-        [data-theme="osu"] .score-box .secondary-text { color: #232323; text-shadow: none; font-family: 'Oswald', sans-serif; font-size: 0.75rem; margin-top: -0.25rem; }
+        /* UPDATED OSU STATUS TEXT */
+        [data-theme="osu"] .score-box .secondary-text {
+            color: #232323;
+            text-shadow: none;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.9rem; /* Increased size */
+            margin-top: -0.25rem;
+        }
         [data-theme="osu"] .p1-score-box { clip-path: polygon(0 0, 100% 0, 100% 100%, 25% 100%, 0 75%); }
         [data-theme="osu"] .p2-score-box { clip-path: polygon(0 0, 100% 0, 100% 75%, 75% 100%, 0 100%); }
         [data-theme="osu"] .p1-bar { background-color: #FF7300; }
@@ -74,20 +108,15 @@
 </head>
 <body class="flex items-start justify-center pt-8" data-theme="osu"> 
 
-    <div id="instruction-message" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center bg-red-800 p-8 rounded-lg shadow-lg">
-        <h1 class="text-4xl font-bold">Configuration Error</h1>
-        <p class="text-xl mt-2">Please set a Stream ID in the OBS Browser Source URL.<br>Example: `.../smash_overlay.html?stream=station1`</p>
-    </div>
-
     <div id="scoreboard-container" class="w-[1200px] h-[120px] flex items-center justify-between relative">
-        <!-- Main Overlay Content -->
+        <!-- Player 1 -->
         <div class="h-full flex items-center">
             <div id="p1ScoreBox" class="score-box p1-score-box flex flex-col items-center justify-center">
                 <span id="p1Score" class="text-4xl leading-none">0</span>
                 <span id="p1Status" class="secondary-text"></span>
             </div>
             <div class="p1-bar h-[70px] flex items-center justify-center pr-4" style="width: 450px;">
-                <div class="flex flex-col items-center text-center overflow-hidden w-[350px]">
+                <div class="flex flex-col items-center text-center w-[350px] px-2">
                     <div id="p1-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
                         <span id="p1Sponsor" class="secondary-text"></span>
                         <span id="p1Tag" class="player-tag-text">Player 1</span>
@@ -97,10 +126,12 @@
                 <img id="p1Character" src="https://placehold.co/80x80/FF7300/FF7300?text=" class="h-[70px] w-auto ml-3">
             </div>
         </div>
+        
+        <!-- Player 2 -->
         <div class="h-full flex items-center">
              <div class="p2-bar h-[70px] flex items-center justify-center pl-4" style="width: 450px;">
                  <img id="p2Character" src="https://placehold.co/80x80/232323/232323?text=" class="h-[70px] w-auto mr-3">
-                 <div class="flex flex-col items-center text-center overflow-hidden w-[350px]">
+                 <div class="flex flex-col items-center text-center w-[350px] px-2">
                     <div id="p2-name-container" class="flex items-baseline gap-3 whitespace-nowrap">
                         <span id="p2Sponsor" class="secondary-text"></span>
                         <span id="p2Tag" class="player-tag-text">Player 2</span>
@@ -113,6 +144,8 @@
                 <span id="p2Status" class="secondary-text"></span>
             </div>
         </div>
+
+        <!-- Centerpiece -->
         <div class="absolute left-1/2 -translate-x-1/2 bottom-[-25px] z-10 flex flex-col items-center">
              <div class="center-logo"></div>
              <div class="match-info-box px-4 py-1 rounded-md text-center -mt-2">
@@ -142,8 +175,10 @@
         import { firebaseConfig } from './firebase-config.js';
 
         const formatCharNameForFile = (name) => {
-             if (!name) return '';
+            if (!name) return '';
             switch (name) {
+                // CORRECTED Banjo mapping
+                case "Banjo & Kazooie": return "BanjoAndKazooie";
                 case "Ice Climbers": return "IceClimbersPopo";
                 case "Pyra and Mythra": return "Pyra";
                 case "R.O.B.": return "Rob";
@@ -205,27 +240,36 @@
             p1ScoreBox.classList.toggle('set-point', data.p1Score === winScore - 1 && winScore > 1);
             p2ScoreBox.classList.toggle('set-point', data.p2Score === winScore - 1 && winScore > 1);
         };
+
         const adjustPlayerFontSize = (playerId) => {
-            const container = document.getElementById(`${playerId}-name-container`);
+            const nameContainer = document.getElementById(`${playerId}-name-container`);
             const sponsor = document.getElementById(`${playerId}Sponsor`);
             const tag = document.getElementById(`${playerId}Tag`);
+            const pronouns = document.getElementById(`${playerId}Pronouns`);
             const theme = document.body.dataset.theme;
             const maxTagSize = theme === 'remix' ? 2.5 : 2.2; const maxSponsorSize = theme === 'remix' ? 1.6 : 1.25;
-            const minTagSize = 1.4; const minSponsorSize = 0.9;
-            const maxWidth = 350;
-            tag.style.fontSize = `${maxTagSize}rem`; sponsor.style.fontSize = `${maxSponsorSize}rem`;
+            const maxPronounSize = 1.25; 
+            const minTagSize = 1.4; const minSponsorSize = 0.9; const minPronounSize = 0.8;
+            const maxWidth = 342;
+            tag.style.fontSize = `${maxTagSize}rem`; sponsor.style.fontSize = `${maxSponsorSize}rem`; pronouns.style.fontSize = `${maxPronounSize}rem`;
             setTimeout(() => {
-                const currentWidth = container.scrollWidth;
+                const nameWidth = nameContainer.scrollWidth;
+                const pronounsWidth = pronouns.scrollWidth;
+                const currentWidth = Math.max(nameWidth, pronounsWidth);
                 if (currentWidth > maxWidth) {
-                    const scale = (maxWidth / currentWidth) * 0.98;
+                    const scale = (maxWidth / currentWidth);
                     const newTagSize = Math.max(minTagSize, maxTagSize * scale);
                     const newSponsorSize = Math.max(minSponsorSize, maxSponsorSize * scale);
-                    tag.style.fontSize = `${newTagSize}rem`; sponsor.style.fontSize = `${newSponsorSize}rem`;
+                    const newPronounSize = Math.max(minPronounSize, maxPronounSize * scale);
+                    tag.style.fontSize = `${newTagSize}rem`;
+                    sponsor.style.fontSize = `${newSponsorSize}rem`;
+                    pronouns.style.fontSize = `${newPronounSize}rem`;
                 } else {
-                    tag.style.fontSize = `${maxTagSize}rem`; sponsor.style.fontSize = `${maxSponsorSize}rem`;
+                    tag.style.fontSize = `${maxTagSize}rem`; sponsor.style.fontSize = `${maxSponsorSize}rem`; pronouns.style.fontSize = `${maxPronounSize}rem`;
                 }
             }, 50);
         };
+        
         const triggerVsScreen = async (data, docRef) => {
             if (vsScreenActive) return;
             vsScreenActive = true;
@@ -248,13 +292,11 @@
         const main = async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const streamId = urlParams.get('stream');
-
             if (!streamId) {
                 document.getElementById('scoreboard-container').style.display = 'none';
                 document.getElementById('instruction-message').classList.remove('hidden');
                 return;
             }
-
             try {
                 const app = initializeApp(firebaseConfig);
                 const db = getFirestore(app);
@@ -277,7 +319,6 @@
                 document.getElementById('instruction-message').innerHTML = `<h1 class="text-4xl font-bold">Connection Error</h1><p class="text-xl mt-2">Failed to connect to the database. Check console for details.</p>`;
             }
         };
-
         main();
     </script>
 </body>
