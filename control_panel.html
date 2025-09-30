@@ -3,150 +3,407 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Plum Series Overlay</title>
+    <title>Overlay Control Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Lobster&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: transparent;
-            color: white;
-            overflow: hidden;
-            width: 1920px;
-            height: 1080px;
+            font-family: 'Roboto Slab', serif;
+            background-color: #2D3748;
+            color: #E2E8F0;
         }
-
-        .player-tag-text {
-            font-family: 'Anton', sans-serif;
-            font-size: 2.5rem;
-            color: white;
-            text-shadow: 0 0 8px #C084FC, 0 0 12px #C084FC; /* Purple Glow */
+        .card {
+            background-color: #1A202C;
+            border-radius: 0.75rem;
+            border: 1px solid #4A5568;
         }
-        .coach-text {
-            font-family: 'Lobster', cursive;
-            font-size: 1.6rem;
-            color: #E9D5FF; /* Lighter Purple */
-            text-shadow: 0 0 5px #000, 0 0 8px #000;
-        }
-        
-        .score-box {
-            background-color: rgba(26, 32, 44, 0.8);
-            backdrop-filter: blur(5px);
-            border: 2px solid #9F7AEA; /* Purple Border */
+        .input-field {
+            background-color: #2D3748;
+            border: 1px solid #4A5568;
             border-radius: 0.5rem;
-            color: #C084FC;
-            font-family: 'Anton', sans-serif;
+            padding: 0.5rem 0.75rem;
+            width: 100%;
+            color: #E2E8F0;
         }
-
-        .player-bar {
-            background-color: rgba(26, 32, 44, 0.8);
-            backdrop-filter: blur(5px);
-            border: 2px solid #9F7AEA; /* Purple Border */
+        .btn {
+            padding: 0.75rem 1.5rem;
             border-radius: 0.5rem;
-        }
-
-        .center-logo {
-            width: 120px; height: 120px;
-            border-radius: 50%; border: 4px solid white;
-            /* The Plum Series Logo */
-            background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/The_Plum_Series_Logo.png');
-            background-size: contain; 
-            background-position: center;
-            background-repeat: no-repeat;
-            background-color: #1a202c;
-        }
-
-        .match-info-box {
-            background-color: #C084FC; color: #1A202C;
-            font-family: 'Anton', sans-serif;
+            font-weight: 700;
             text-transform: uppercase;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+        .btn-primary { background-color: #DD6B20; color: white; }
+        .btn-primary:hover { background-color: #C05621; }
+        .btn-secondary { background-color: #4A5568; color: #E2E8F0; }
+        .btn-secondary:hover { background-color: #2D3748; }
+        .btn-danger { background-color: #9B2C2C; color: white; }
+        .btn-danger:hover { background-color: #742A2A; }
+        .btn-toggle.active {
+            background-color: #2C7A7B;
         }
     </style>
 </head>
-<body class="flex items-start justify-center pt-8">
+<body class="p-4 md:p-8">
+    <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <h1 class="text-3xl font-bold font-['Oswald'] tracking-wider text-white">Overlay Control Panel</h1>
+        <div class="flex items-center gap-2">
+            <label for="streamId" class="font-bold text-lg">Stream ID:</label>
+            <input id="streamId" class="input-field w-48" value="default">
+        </div>
+        <div id="status" class="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold">
+            <span id="status-text">Connecting...</span>
+            <div id="status-indicator" class="w-3 h-3 rounded-full bg-yellow-500"></div>
+        </div>
+    </header>
 
-    <div id="instruction-message" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center bg-red-800 p-8 rounded-lg shadow-lg">
-        <h1 class="text-4xl font-bold">Configuration Error</h1>
-        <p class="text-xl mt-2">Please set a Stream ID in the OBS Browser Source URL.<br>Example: `.../plum_series_overlay.html?stream=plumseries`</p>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Player 1 Column -->
+        <div class="card p-6 flex flex-col gap-4">
+             <div class="flex justify-between items-center">
+                 <h2 class="text-xl font-bold font-['Oswald'] text-[#FF7300]">Player 1</h2>
+                 <button id="p1Clear" class="btn btn-secondary text-xs py-1 px-3">Clear</button>
+            </div>
+            <input id="p1Sponsor" class="input-field" placeholder="Sponsor">
+            <input id="p1Tag" class="input-field" placeholder="Tag">
+            <input id="p1Coach" class="input-field" placeholder="Coach">
+            <input id="p1Pronouns" class="input-field" placeholder="Pronouns">
+            <input id="p1Status" class="input-field" placeholder="Status (W/L)">
+            <div class="flex items-center gap-4">
+                <button id="p1ScoreMinus" class="btn btn-danger w-16">-</button>
+                <input id="p1Score" type="number" class="input-field text-center" value="0">
+                <button id="p1ScorePlus" class="btn btn-primary bg-green-600 hover:bg-green-700 w-16">+</button>
+            </div>
+            <div class="flex items-center gap-2">
+                 <select id="p1Character" class="input-field"></select>
+                 <input id="p1Alt" type="number" class="input-field w-20 text-center" value="1" min="1" max="8">
+            </div>
+            <div class="pt-4 border-t border-gray-700">
+                <h3 class="font-bold mb-2">Player Presets</h3>
+                <div class="flex gap-2">
+                    <select id="p1Preset" class="input-field"><option>Select Preset...</option></select>
+                    <button id="p1PresetLoad" class="btn btn-secondary text-sm p-2">Load</button>
+                    <button id="p1PresetDelete" class="btn btn-danger text-sm p-2">Del</button>
+                </div>
+                <button id="p1PresetSave" class="btn btn-secondary w-full mt-2">Save Current as Preset</button>
+            </div>
+        </div>
+
+        <!-- Match Info Column -->
+        <div class="card p-6 flex flex-col gap-4">
+            <h2 class="text-xl font-bold font-['Oswald'] text-white">Match Info</h2>
+            <div>
+                <label for="theme" class="block mb-1 text-sm font-bold">Theme</label>
+                <select id="theme" class="input-field">
+                    <option value="osu">OSU Theme</option>
+                    <option value="remix">Remix Theme</option>
+                </select>
+            </div>
+            <input id="round" class="input-field" placeholder="Round">
+            <div class="flex items-center gap-2">
+                <select id="formatPrefix" class="input-field w-1/2">
+                    <option>Best of</option>
+                    <option>First to</option>
+                </select>
+                <input id="formatNumber" type="number" class="input-field w-1/2" placeholder="e.g. 5">
+            </div>
+            <button id="swapPlayers" class="btn btn-secondary">Swap Players</button>
+            <button id="resetMatch" class="btn btn-danger">Reset Match</button>
+            <button id="forceUpdate" class="btn btn-primary">Force Update</button>
+            <div class="pt-4 border-t border-gray-700 flex flex-col gap-2">
+                 <button id="toggleCommentators" class="btn btn-secondary btn-toggle">Show Commentators</button>
+                 <button id="toggleTicker" class="btn btn-secondary btn-toggle">Show Ticker</button>
+                 <button id="showVsScreen" class="btn btn-secondary bg-purple-700 hover:bg-purple-800">Show VS Screen</button>
+            </div>
+        </div>
+
+        <!-- Player 2 Column -->
+        <div class="card p-6 flex flex-col gap-4">
+             <div class="flex justify-between items-center">
+                 <h2 class="text-xl font-bold font-['Oswald'] text-[#FF7300]">Player 2</h2>
+                 <button id="p2Clear" class="btn btn-secondary text-xs py-1 px-3">Clear</button>
+            </div>
+            <input id="p2Sponsor" class="input-field" placeholder="Sponsor">
+            <input id="p2Tag" class="input-field" placeholder="Tag">
+            <input id="p2Coach" class="input-field" placeholder="Coach">
+            <input id="p2Pronouns" class="input-field" placeholder="Pronouns">
+            <input id="p2Status" class="input-field" placeholder="Status (W/L)">
+            <div class="flex items-center gap-4">
+                <button id="p2ScoreMinus" class="btn btn-danger w-16">-</button>
+                <input id="p2Score" type="number" class="input-field text-center" value="0">
+                <button id="p2ScorePlus" class="btn btn-primary bg-green-600 hover:bg-green-700 w-16">+</button>
+            </div>
+            <div class="flex items-center gap-2">
+                <select id="p2Character" class="input-field"></select>
+                <input id="p2Alt" type="number" class="input-field w-20 text-center" value="1" min="1" max="8">
+            </div>
+            <div class="pt-4 border-t border-gray-700">
+                <h3 class="font-bold mb-2">Player Presets</h3>
+                <div class="flex gap-2">
+                    <select id="p2Preset" class="input-field"><option>Select Preset...</option></select>
+                    <button id="p2PresetLoad" class="btn btn-secondary text-sm p-2">Load</button>
+                    <button id="p2PresetDelete" class="btn btn-danger text-sm p-2">Del</button>
+                </div>
+                <button id="p2PresetSave" class="btn btn-secondary w-full mt-2">Save Current as Preset</button>
+            </div>
+        </div>
     </div>
-
-    <div id="scoreboard-container" class="w-[1200px] h-auto flex items-center justify-between relative">
-        <!-- Player 1 -->
-        <div class="h-full flex items-center">
-            <div class="score-box flex flex-col items-center justify-center p-2 w-24 h-24">
-                <span id="p1Score" class="text-5xl leading-none">0</span>
-            </div>
-            <div class="player-bar h-auto flex items-center justify-center p-4 ml-[-10px] z-[-1]" style="width: 450px;">
-                <div class="flex flex-col items-center text-center w-[350px]">
-                    <span id="p1Tag" class="player-tag-text">Player 1</span>
-                    <span id="p1Coach" class="coach-text"></span>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        <div class="card p-6 lg:col-span-2">
+             <h2 class="text-xl font-bold font-['Oswald'] text-white mb-4">Commentators</h2>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <input id="commentator1Name" class="input-field" placeholder="Commentator 1 Name">
+                    <input id="commentator1Social" class="input-field mt-2" placeholder="@social1">
                 </div>
-            </div>
-        </div>
-        
-        <!-- Player 2 -->
-        <div class="h-full flex items-center">
-             <div class="player-bar h-auto flex items-center justify-center p-4 mr-[-10px] z-[-1]" style="width: 450px;">
-                 <div class="flex flex-col items-center text-center w-[350px]">
-                    <span id="p2Tag" class="player-tag-text">Player 2</span>
-                    <span id="p2Coach" class="coach-text"></span>
+                <div>
+                    <input id="commentator2Name" class="input-field" placeholder="Commentator 2 Name">
+                    <input id="commentator2Social" class="input-field mt-2" placeholder="@social2">
                 </div>
-            </div>
-            <div class="score-box flex flex-col items-center justify-center p-2 w-24 h-24">
-                <span id="p2Score" class="text-5xl leading-none">0</span>
-            </div>
-        </div>
-
-        <!-- Centerpiece -->
-        <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col items-center">
-             <div class="center-logo"></div>
-             <div class="match-info-box px-4 py-1 rounded-md text-center mt-2">
-                 <span id="round">Grand Finals</span> | <span id="format">Best of 5</span>
              </div>
+        </div>
+        <div class="card p-6">
+            <h2 class="text-xl font-bold font-['Oswald'] text-white mb-4">Upcoming Match Ticker</h2>
+            <input id="tickerText" class="input-field" placeholder="Up next: Player A vs Player B">
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { firebaseConfig } from './firebase-config.js';
 
-        const main = async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const streamId = urlParams.get('stream');
+        const characters = [
+            "Banjo & Kazooie", "Bayonetta", "Bowser", "Bowser Jr.", "Byleth", "Captain Falcon", "Chrom", "Cloud", "Corrin",
+            "Daisy", "Dark Pit", "Dark Samus", "Diddy Kong", "Donkey Kong", "Dr. Mario", "Duck Hunt", "Falco", "Fox", 
+            "Ganondorf", "Greninja", "Hero", "Ice Climbers", "Ike", "Incineroar", "Inkling", "Isabelle", "Jigglypuff", 
+            "Joker", "Kazuya", "Ken", "King Dedede", "King K. Rool", "Kirby", "Link", "Little Mac", "Lucario", "Lucas", 
+            "Lucina", "Luigi", "Mario", "Marth", "Mega Man", "Meta Knight", "Mewtwo", "Mii Brawler", "Mii Gunner", 
+            "Mii Swordfighter", "Min Min", "Mr. Game & Watch", "Ness", "Olimar", "Pac-Man", "Palutena", "Peach", "Pichu", 
+            "Pikachu", "Piranha Plant", "Pit", "Pyra and Mythra", "Richter", "Ridley", "R.O.B.", "Robin", "Rosalina & Luma", 
+            "Roy", "Ryu", "Samus", "Sephiroth", "Sheik", "Shulk", "Simon", "Snake", "Sora", "Sonic", "Steve", "Terry", 
+            "Toon Link", "Villager", "Wario", "Wii Fit Trainer", "Wolf", "Yoshi", "Young Link", "Zelda", "Zero Suit Samus"
+        ];
+        characters.forEach(char => {
+            const option = `<option value="${char}">${char}</option>`;
+            document.getElementById('p1Character').innerHTML += option;
+            document.getElementById('p2Character').innerHTML += option;
+        });
 
-            if (!streamId) {
-                document.getElementById('scoreboard-container').style.display = 'none';
-                document.getElementById('instruction-message').classList.remove('hidden');
-                return;
-            }
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+        let db, auth;
+        let docRef, presetsColRef;
+        let unsubscribeDoc, unsubscribePresets;
+        
+        let showCommentators = false;
+        let showTicker = false;
 
+        const connectToStream = async () => {
+            if (unsubscribeDoc) unsubscribeDoc();
+            if (unsubscribePresets) unsubscribePresets();
+
+            const streamId = document.getElementById('streamId').value.trim() || 'default';
+            localStorage.setItem('smashOverlayStreamId', streamId);
+
+            docRef = doc(db, 'overlays', streamId);
+            presetsColRef = collection(db, 'overlays', streamId, 'presets');
+
+            statusIndicator.classList.replace('bg-green-500', 'bg-yellow-500').replace('bg-red-500', 'bg-yellow-500');
+            statusText.textContent = `Connecting to ${streamId}...`;
+            
             try {
-                const app = initializeApp(firebaseConfig);
-                const db = getFirestore(app);
-                const auth = getAuth(app);
-                await signInAnonymously(auth);
-                const docRef = doc(db, 'overlays', streamId);
-                onSnapshot(docRef, (doc) => {
-                    const data = doc.exists() ? doc.data() : {};
-                    document.getElementById('p1Tag').textContent = data.p1Tag || 'Player 1';
-                    document.getElementById('p1Coach').textContent = data.p1Coach || '';
-                    document.getElementById('p1Score').textContent = data.p1Score ?? 0;
-                    document.getElementById('p2Tag').textContent = data.p2Tag || 'Player 2';
-                    document.getElementById('p2Coach').textContent = data.p2Coach || '';
-                    document.getElementById('p2Score').textContent = data.p2Score ?? 0;
-                    document.getElementById('round').textContent = data.round || 'Grand Finals';
-                    document.getElementById('format').textContent = `${data.formatPrefix || 'Best of'} ${data.formatNumber || 5}`;
+                unsubscribeDoc = onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        Object.keys(data).forEach(key => {
+                            const el = document.getElementById(key);
+                            if (el) el.value = data[key];
+                        });
+                        showCommentators = data.showCommentators || false;
+                        showTicker = data.showTicker || false;
+                        updateToggleButtons();
+                    }
+                    handleRoundChange(false);
                 });
+                
+                setupPresetListeners();
+
+                statusIndicator.classList.replace('bg-yellow-500', 'bg-green-500');
+                statusText.textContent = `Synced to ${streamId}`;
             } catch (error) {
-                console.error("OVERLAY FAILED TO CONNECT:", error);
-                document.getElementById('scoreboard-container').style.display = 'none';
-                document.getElementById('instruction-message').classList.add('hidden');
-                document.getElementById('instruction-message').innerHTML = `<h1 class="text-4xl font-bold">Connection Error</h1><p class="text-xl mt-2">Failed to connect to the database. Check console for details.</p>`;
+                 console.error("DB connection failed:", error);
+                statusIndicator.classList.replace('bg-yellow-500', 'bg-red-500');
+                statusText.textContent = 'Connection Failed';
             }
         };
+
+        const main = async () => {
+            document.getElementById('streamId').value = localStorage.getItem('smashOverlayStreamId') || 'default';
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                await signInAnonymously(auth);
+                await connectToStream();
+                setupStaticListeners();
+            } catch (error) {
+                 console.error("Initial connection failed:", error);
+                statusIndicator.classList.replace('bg-yellow-500', 'bg-red-500');
+                statusText.textContent = 'DB Init Failed';
+            }
+        };
+
+        const saveData = async () => {
+            if (!docRef) return;
+            const data = {
+                p1Sponsor: document.getElementById('p1Sponsor').value, p1Tag: document.getElementById('p1Tag').value,
+                p1Coach: document.getElementById('p1Coach').value, // Save coach
+                p1Pronouns: document.getElementById('p1Pronouns').value, p1Status: document.getElementById('p1Status').value,
+                p1Score: parseInt(document.getElementById('p1Score').value, 10), p1Character: document.getElementById('p1Character').value,
+                p1Alt: parseInt(document.getElementById('p1Alt').value, 10),
+                p2Sponsor: document.getElementById('p2Sponsor').value, p2Tag: document.getElementById('p2Tag').value,
+                p2Coach: document.getElementById('p2Coach').value, // Save coach
+                p2Pronouns: document.getElementById('p2Pronouns').value, p2Status: document.getElementById('p2Status').value,
+                p2Score: parseInt(document.getElementById('p2Score').value, 10), p2Character: document.getElementById('p2Character').value,
+                p2Alt: parseInt(document.getElementById('p2Alt').value, 10),
+                round: document.getElementById('round').value, formatPrefix: document.getElementById('formatPrefix').value,
+                formatNumber: document.getElementById('formatNumber').value,
+                theme: document.getElementById('theme').value,
+                commentator1Name: document.getElementById('commentator1Name').value,
+                commentator1Social: document.getElementById('commentator1Social').value,
+                commentator2Name: document.getElementById('commentator2Name').value,
+                commentator2Social: document.getElementById('commentator2Social').value,
+                tickerText: document.getElementById('tickerText').value,
+                showCommentators: showCommentators,
+                showTicker: showTicker,
+            };
+            try {
+                await setDoc(docRef, data, { merge: true });
+            } catch (error) {
+                console.error("Error saving data: ", error);
+            }
+        };
+        
+        const handleRoundChange = (shouldSave = true) => {
+            const roundText = document.getElementById('round').value.toLowerCase();
+            const p1StatusInput = document.getElementById('p1Status');
+            const p2StatusInput = document.getElementById('p2Status');
+            if (roundText.includes('grand') || roundText.includes('true')) { p1StatusInput.value = 'Winners'; p2StatusInput.value = 'Losers'; } 
+            else if (roundText.includes('losers')) { p1StatusInput.value = 'Losers'; p2StatusInput.value = 'Losers'; } 
+            else if (roundText.includes('winners') || roundText.trim() === '') { p1StatusInput.value = 'Winners'; p2StatusInput.value = 'Winners'; }
+            else { p1StatusInput.value = ''; p2StatusInput.value = ''; }
+            if (shouldSave) saveData();
+        };
+
+        const updateToggleButtons = () => {
+            const commsBtn = document.getElementById('toggleCommentators');
+            const tickerBtn = document.getElementById('toggleTicker');
+            commsBtn.textContent = showCommentators ? 'Hide Commentators' : 'Show Commentators';
+            tickerBtn.textContent = showTicker ? 'Hide Ticker' : 'Show Ticker';
+            commsBtn.classList.toggle('active', showCommentators);
+            tickerBtn.classList.toggle('active', showTicker);
+        };
+
+        const setupStaticListeners = () => {
+            document.getElementById('streamId').addEventListener('change', connectToStream);
+            document.querySelectorAll('input, select').forEach(el => { if (el.id !== 'round' && el.id !== 'streamId') el.addEventListener('change', saveData) });
+            document.getElementById('round').addEventListener('input', () => handleRoundChange(true));
+            document.getElementById('forceUpdate').addEventListener('click', saveData);
+            document.getElementById('p1ScorePlus').addEventListener('click', () => { document.getElementById('p1Score').value++; saveData(); });
+            document.getElementById('p1ScoreMinus').addEventListener('click', () => { document.getElementById('p1Score').value--; saveData(); });
+            document.getElementById('p2ScorePlus').addEventListener('click', () => { document.getElementById('p2Score').value++; saveData(); });
+            document.getElementById('p2ScoreMinus').addEventListener('click', () => { document.getElementById('p2Score').value--; saveData(); });
+            document.getElementById('swapPlayers').addEventListener('click', () => {
+                const fields = ['Sponsor', 'Tag', 'Pronouns', 'Status', 'Score', 'Character', 'Alt', 'Coach'];
+                fields.forEach(field => {
+                    const p1El = document.getElementById(`p1${field}`); const p2El = document.getElementById(`p2${field}`);
+                    const temp = p1El.value; p1El.value = p2El.value; p2El.value = temp;
+                });
+                saveData();
+            });
+            document.getElementById('resetMatch').addEventListener('click', () => {
+                document.getElementById('p1Score').value = 0; document.getElementById('p2Score').value = 0;
+                handleRoundChange(true);
+            });
+            document.getElementById('p1Clear').addEventListener('click', () => {
+                document.getElementById('p1Sponsor').value = ''; document.getElementById('p1Tag').value = ''; document.getElementById('p1Pronouns').value = ''; document.getElementById('p1Coach').value = '';
+                saveData();
+            });
+            document.getElementById('p2Clear').addEventListener('click', () => {
+                document.getElementById('p2Sponsor').value = ''; document.getElementById('p2Tag').value = ''; document.getElementById('p2Pronouns').value = ''; document.getElementById('p2Coach').value = '';
+                saveData();
+            });
+            document.getElementById('toggleCommentators').addEventListener('click', () => { showCommentators = !showCommentators; updateToggleButtons(); saveData(); });
+            document.getElementById('toggleTicker').addEventListener('click', () => { showTicker = !showTicker; updateToggleButtons(); saveData(); });
+            document.getElementById('showVsScreen').addEventListener('click', async () => { if (docRef) await updateDoc(docRef, { showVsScreen: true }); });
+        };
+
+        function setupPresetListeners() {
+            if (unsubscribePresets) unsubscribePresets(); 
+            
+            unsubscribePresets = onSnapshot(presetsColRef, (snapshot) => {
+                const p1PresetSelect = document.getElementById('p1Preset');
+                const p2PresetSelect = document.getElementById('p2Preset');
+                const currentP1 = p1PresetSelect.value;
+                const currentP2 = p2PresetSelect.value;
+                p1PresetSelect.innerHTML = '<option value="">Select Preset...</option>';
+                p2PresetSelect.innerHTML = '<option value="">Select Preset...</option>';
+                snapshot.docs.sort((a, b) => a.data().tag.localeCompare(b.data().tag)).forEach(doc => {
+                    const option = `<option value="${doc.id}">${doc.data().tag}</option>`;
+                    p1PresetSelect.innerHTML += option;
+                    p2PresetSelect.innerHTML += option;
+                });
+                p1PresetSelect.value = currentP1;
+                p2PresetSelect.value = currentP2;
+            });
+            
+            document.getElementById('p1PresetSave').onclick = async () => {
+                const tag = document.getElementById('p1Tag').value.trim();
+                if (!tag) { alert("Player tag cannot be empty."); return; }
+                await addDoc(presetsColRef, { tag: tag, sponsor: document.getElementById('p1Sponsor').value, pronouns: document.getElementById('p1Pronouns').value });
+            };
+            document.getElementById('p2PresetSave').onclick = async () => {
+                 const tag = document.getElementById('p2Tag').value.trim();
+                if (!tag) { alert("Player tag cannot be empty."); return; }
+                await addDoc(presetsColRef, { tag: tag, sponsor: document.getElementById('p2Sponsor').value, pronouns: document.getElementById('p2Pronouns').value });
+            };
+            document.getElementById('p1PresetLoad').onclick = async () => {
+                const id = document.getElementById('p1Preset').value; if (!id) return;
+                const docSnap = await getDoc(doc(presetsColRef, id));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('p1Sponsor').value = data.sponsor;
+                    document.getElementById('p1Tag').value = data.tag;
+                    document.getElementById('p1Pronouns').value = data.pronouns;
+                    saveData();
+                }
+            };
+             document.getElementById('p2PresetLoad').onclick = async () => {
+                const id = document.getElementById('p2Preset').value; if (!id) return;
+                const docSnap = await getDoc(doc(presetsColRef, id));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('p2Sponsor').value = data.sponsor;
+                    document.getElementById('p2Tag').value = data.tag;
+                    document.getElementById('p2Pronouns').value = data.pronouns;
+                    saveData();
+                }
+            };
+            document.getElementById('p1PresetDelete').onclick = async () => {
+                const id = document.getElementById('p1Preset').value; if (!id) return;
+                await deleteDoc(doc(presetsColRef, id));
+            };
+            document.getElementById('p2PresetDelete').onclick = async () => {
+                const id = document.getElementById('p2Preset').value; if (!id) return;
+                await deleteDoc(doc(presetsColRef, id));
+            };
+        }
 
         main();
     </script>
 </body>
 </html>
+
