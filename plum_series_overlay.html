@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Plum Series Overlay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Lobster&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: transparent;
+            color: white;
+            overflow: hidden;
+            width: 1920px;
+            height: 1080px;
+        }
+
+        .player-tag-text {
+            font-family: 'Anton', sans-serif;
+            font-size: 2.5rem;
+            color: white;
+            text-shadow: 0 0 8px #C084FC, 0 0 12px #C084FC; /* Purple Glow */
+        }
+        .coach-text {
+            font-family: 'Lobster', cursive;
+            font-size: 1.6rem;
+            color: #E9D5FF; /* Lighter Purple */
+            text-shadow: 0 0 5px #000, 0 0 8px #000;
+        }
+        
+        .score-box {
+            background-color: rgba(26, 32, 44, 0.8);
+            backdrop-filter: blur(5px);
+            border: 2px solid #9F7AEA; /* Purple Border */
+            border-radius: 0.5rem;
+            color: #C084FC;
+            font-family: 'Anton', sans-serif;
+        }
+
+        .player-bar {
+            background-color: rgba(26, 32, 44, 0.8);
+            backdrop-filter: blur(5px);
+            border: 2px solid #9F7AEA; /* Purple Border */
+            border-radius: 0.5rem;
+        }
+
+        .center-logo {
+            width: 120px; height: 120px;
+            border-radius: 50%; border: 4px solid white;
+            /* The Plum Series Logo */
+            background-image: url('https://raw.githubusercontent.com/destronfgc/stillwatersmash/main/images/The_Plum_Series_Logo.png');
+            background-size: contain; 
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #1a202c;
+        }
+
+        .match-info-box {
+            background-color: #C084FC; color: #1A202C;
+            font-family: 'Anton', sans-serif;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="flex items-start justify-center pt-8">
+
+    <div id="instruction-message" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center bg-red-800 p-8 rounded-lg shadow-lg">
+        <h1 class="text-4xl font-bold">Configuration Error</h1>
+        <p class="text-xl mt-2">Please set a Stream ID in the OBS Browser Source URL.<br>Example: `.../plum_series_overlay.html?stream=plumseries`</p>
+    </div>
+
+    <div id="scoreboard-container" class="w-[1200px] h-auto flex items-center justify-between relative">
+        <!-- Player 1 -->
+        <div class="h-full flex items-center">
+            <div class="score-box flex flex-col items-center justify-center p-2 w-24 h-24">
+                <span id="p1Score" class="text-5xl leading-none">0</span>
+            </div>
+            <div class="player-bar h-auto flex items-center justify-center p-4 ml-[-10px] z-[-1]" style="width: 450px;">
+                <div class="flex flex-col items-center text-center w-[350px]">
+                    <span id="p1Tag" class="player-tag-text">Player 1</span>
+                    <span id="p1Coach" class="coach-text"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Player 2 -->
+        <div class="h-full flex items-center">
+             <div class="player-bar h-auto flex items-center justify-center p-4 mr-[-10px] z-[-1]" style="width: 450px;">
+                 <div class="flex flex-col items-center text-center w-[350px]">
+                    <span id="p2Tag" class="player-tag-text">Player 2</span>
+                    <span id="p2Coach" class="coach-text"></span>
+                </div>
+            </div>
+            <div class="score-box flex flex-col items-center justify-center p-2 w-24 h-24">
+                <span id="p2Score" class="text-5xl leading-none">0</span>
+            </div>
+        </div>
+
+        <!-- Centerpiece -->
+        <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col items-center">
+             <div class="center-logo"></div>
+             <div class="match-info-box px-4 py-1 rounded-md text-center mt-2">
+                 <span id="round">Grand Finals</span> | <span id="format">Best of 5</span>
+             </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { firebaseConfig } from './firebase-config.js';
+
+        const main = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const streamId = urlParams.get('stream');
+
+            if (!streamId) {
+                document.getElementById('scoreboard-container').style.display = 'none';
+                document.getElementById('instruction-message').classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                const db = getFirestore(app);
+                const auth = getAuth(app);
+                await signInAnonymously(auth);
+                const docRef = doc(db, 'overlays', streamId);
+                onSnapshot(docRef, (doc) => {
+                    const data = doc.exists() ? doc.data() : {};
+                    document.getElementById('p1Tag').textContent = data.p1Tag || 'Player 1';
+                    document.getElementById('p1Coach').textContent = data.p1Coach || '';
+                    document.getElementById('p1Score').textContent = data.p1Score ?? 0;
+                    document.getElementById('p2Tag').textContent = data.p2Tag || 'Player 2';
+                    document.getElementById('p2Coach').textContent = data.p2Coach || '';
+                    document.getElementById('p2Score').textContent = data.p2Score ?? 0;
+                    document.getElementById('round').textContent = data.round || 'Grand Finals';
+                    document.getElementById('format').textContent = `${data.formatPrefix || 'Best of'} ${data.formatNumber || 5}`;
+                });
+            } catch (error) {
+                console.error("OVERLAY FAILED TO CONNECT:", error);
+                document.getElementById('scoreboard-container').style.display = 'none';
+                document.getElementById('instruction-message').classList.add('hidden');
+                document.getElementById('instruction-message').innerHTML = `<h1 class="text-4xl font-bold">Connection Error</h1><p class="text-xl mt-2">Failed to connect to the database. Check console for details.</p>`;
+            }
+        };
+
+        main();
+    </script>
+</body>
+</html>
