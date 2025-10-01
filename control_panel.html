@@ -211,7 +211,9 @@
             docRef = doc(db, 'overlays', streamId);
             presetsColRef = collection(db, 'overlays', streamId, 'presets');
 
-            statusIndicator.classList.replace('bg-green-500', 'bg-yellow-500').replace('bg-red-500', 'bg-yellow-500');
+            // CORRECTED JAVASCRIPT
+            statusIndicator.classList.replace('bg-green-500', 'bg-yellow-500');
+            statusIndicator.classList.replace('bg-red-500', 'bg-yellow-500');
             statusText.textContent = `Connecting to ${streamId}...`;
             
             try {
@@ -225,6 +227,13 @@
                         showCommentators = data.showCommentators || false;
                         showTicker = data.showTicker || false;
                         updateToggleButtons();
+                    } else {
+                        // If no data exists for this stream ID, clear the fields
+                        document.querySelectorAll('input, select').forEach(el => {
+                            if (el.type === 'number') el.value = el.id.includes('Alt') ? 1 : 0;
+                            else if (el.tagName === 'SELECT' && !el.id.includes('Preset')) el.selectedIndex = 0;
+                            else if (el.type === 'text' || el.tagName === 'INPUT') el.value = '';
+                        });
                     }
                     handleRoundChange(false);
                 });
@@ -260,12 +269,12 @@
             if (!docRef) return;
             const data = {
                 p1Sponsor: document.getElementById('p1Sponsor').value, p1Tag: document.getElementById('p1Tag').value,
-                p1Coach: document.getElementById('p1Coach').value, // Save coach
+                p1Coach: document.getElementById('p1Coach').value, 
                 p1Pronouns: document.getElementById('p1Pronouns').value, p1Status: document.getElementById('p1Status').value,
                 p1Score: parseInt(document.getElementById('p1Score').value, 10), p1Character: document.getElementById('p1Character').value,
                 p1Alt: parseInt(document.getElementById('p1Alt').value, 10),
                 p2Sponsor: document.getElementById('p2Sponsor').value, p2Tag: document.getElementById('p2Tag').value,
-                p2Coach: document.getElementById('p2Coach').value, // Save coach
+                p2Coach: document.getElementById('p2Coach').value,
                 p2Pronouns: document.getElementById('p2Pronouns').value, p2Status: document.getElementById('p2Status').value,
                 p2Score: parseInt(document.getElementById('p2Score').value, 10), p2Character: document.getElementById('p2Character').value,
                 p2Alt: parseInt(document.getElementById('p2Alt').value, 10),
